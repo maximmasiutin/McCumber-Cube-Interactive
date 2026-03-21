@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The McCumber Cube - Information Security Framework</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    position: relative;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 6px;
+  }
+
+  header p.subtitle {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* Language switcher */
+  .lang-switcher {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    display: flex;
+    gap: 4px;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 3px;
+    border: 1px solid #334155;
+  }
+
+  .lang-btn {
+    background: transparent;
+    color: #94a3b8;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .lang-btn:hover { color: #f8fafc; }
+
+  .lang-btn.active {
+    background: #6366f1;
+    color: #fff;
+  }
+
+  .main-layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px 30px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ---- 3D CUBE ---- */
+  .cube-container {
+    width: 420px;
+    height: 420px;
+    perspective: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cube-scene {
+    width: 260px;
+    height: 260px;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-25deg) rotateY(-35deg);
+    transition: transform 0.6s ease;
+  }
+
+  .cube-scene.spin {
+    animation: slowSpin 30s linear infinite;
+  }
+
+  @keyframes slowSpin {
+    from { transform: rotateX(-25deg) rotateY(-35deg); }
+    to   { transform: rotateX(-25deg) rotateY(325deg); }
+  }
+
+  .cube-face {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    backface-visibility: visible;
+  }
+
+  .cube-face.front  { transform: translateZ(130px); }
+  .cube-face.back   { transform: rotateY(180deg) translateZ(130px); }
+  .cube-face.right  { transform: rotateY(90deg) translateZ(130px); }
+  .cube-face.left   { transform: rotateY(-90deg) translateZ(130px); }
+  .cube-face.top    { transform: rotateX(90deg) translateZ(130px); }
+  .cube-face.bottom { transform: rotateX(-90deg) translateZ(130px); }
+
+  .cube-cell {
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 2px;
+    line-height: 1.15;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .cube-cell:hover {
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+  }
+
+  .cube-cell.highlight {
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.8);
+    outline: 2px solid #a5b4fc;
+  }
+
+  .cube-face.front  .cube-cell { background: rgba(99, 102, 241, 0.35); }
+  .cube-face.back   .cube-cell { background: rgba(99, 102, 241, 0.18); }
+  .cube-face.right  .cube-cell { background: rgba(16, 185, 129, 0.35); }
+  .cube-face.left   .cube-cell { background: rgba(16, 185, 129, 0.18); }
+  .cube-face.top    .cube-cell { background: rgba(245, 158, 11, 0.35); }
+  .cube-face.bottom .cube-cell { background: rgba(245, 158, 11, 0.18); }
+
+  .cube-controls {
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .cube-controls button {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin: 0 4px;
+    transition: all 0.2s;
+  }
+
+  .cube-controls button:hover,
+  .cube-controls button.active {
+    background: #334155;
+    color: #f8fafc;
+    border-color: #6366f1;
+  }
+
+  .cube-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .axis-labels {
+    display: flex;
+    gap: 20px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .axis-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+  }
+
+  .axis-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  .axis-dot.x { background: #6366f1; }
+  .axis-dot.y { background: #10b981; }
+  .axis-dot.z { background: #f59e0b; }
+
+  /* ---- RIGHT PANEL ---- */
+  .right-panel {
+    flex: 1;
+    min-width: 320px;
+    max-width: 580px;
+  }
+
+  .dim-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .dim-card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border-left: 4px solid;
+    transition: all 0.25s;
+  }
+
+  .dim-card.x-card { border-color: #6366f1; }
+  .dim-card.y-card { border-color: #10b981; }
+  .dim-card.z-card { border-color: #f59e0b; }
+
+  .dim-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dim-card .badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .x-card .badge { background: #6366f1; }
+  .y-card .badge { background: #10b981; }
+  .z-card .badge { background: #f59e0b; }
+
+  .dim-card .items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .dim-card .item {
+    background: #0f172a;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #334155;
+  }
+
+  .dim-card .item:hover {
+    border-color: #6366f1;
+    color: #f8fafc;
+  }
+
+  .dim-card .item.selected {
+    border-color: #6366f1;
+    background: #312e81;
+    color: #fff;
+  }
+
+  .detail-panel {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 180px;
+    border: 1px solid #334155;
+  }
+
+  .detail-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #f8fafc;
+  }
+
+  .detail-panel .combo-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .combo-label .tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+  }
+
+  .combo-label .tag.x { background: rgba(99,102,241,0.25); color: #a5b4fc; }
+  .combo-label .tag.y { background: rgba(16,185,129,0.25); color: #6ee7b7; }
+  .combo-label .tag.z { background: rgba(245,158,11,0.25); color: #fcd34d; }
+
+  .detail-panel p {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+  }
+
+  .detail-panel .example {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    border-left: 3px solid #6366f1;
+  }
+
+  .detail-panel .example strong {
+    color: #a5b4fc;
+    font-size: 0.8rem;
+  }
+
+  .detail-panel .example p {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    color: #94a3b8;
+  }
+
+  /* ---- GRID TABLE ---- */
+  .grid-section {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+  }
+
+  .grid-section h2 {
+    text-align: center;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    color: #f8fafc;
+  }
+
+  .grid-section p.sub {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .matrix-wrapper { overflow-x: auto; }
+
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    table-layout: fixed;
+  }
+
+  table.matrix th, table.matrix td {
+    padding: 8px 6px;
+    text-align: left;
+    border: 1px solid #334155;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  table.matrix thead th {
+    background: #334155;
+    color: #f8fafc;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  table.matrix th.row-header {
+    background: #263348;
+    font-weight: 700;
+    color: #e2e8f0;
+    width: 100px;
+    text-align: center;
+  }
+
+  table.matrix td {
+    color: #cbd5e1;
+    line-height: 1.45;
+  }
+
+  table.matrix .conf { background: rgba(99,102,241,0.08); }
+  table.matrix .intg { background: rgba(16,185,129,0.08); }
+  table.matrix .avail { background: rgba(245,158,11,0.08); }
+
+  table.matrix td:hover {
+    background: rgba(99,102,241,0.15);
+    cursor: pointer;
+  }
+
+  table.matrix td.highlight {
+    background: rgba(99,102,241,0.25) !important;
+    outline: 2px solid #6366f1;
+    outline-offset: -2px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #475569;
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 900px) {
+    .main-layout { flex-direction: column; align-items: center; }
+    .right-panel { max-width: 100%; }
+    .cube-container { width: 340px; height: 340px; }
+    .lang-switcher { position: static; margin: 10px auto 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ro')">RO</button>
+    <button class="lang-btn" onclick="setLang('ru')">RU</button>
+  </div>
+  <h1 id="pageTitle"></h1>
+  <p class="subtitle" id="pageSubtitle"></p>
+</header>
+
+<div class="main-layout">
+  <div class="cube-wrapper">
+    <div class="cube-container">
+      <div class="cube-scene spin" id="cubeScene">
+        <div class="cube-face front" id="faceFront"></div>
+        <div class="cube-face back"></div>
+        <div class="cube-face right" id="faceRight"></div>
+        <div class="cube-face left"></div>
+        <div class="cube-face top" id="faceTop"></div>
+        <div class="cube-face bottom"></div>
+      </div>
+    </div>
+    <div class="axis-labels" id="axisLabels"></div>
+    <div class="cube-controls">
+      <button id="btnSpin" class="active" onclick="toggleSpin()"></button>
+      <button id="btnReset" onclick="resetCube()"></button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="dim-cards" id="dimCards"></div>
+    <div class="detail-panel" id="detailPanel"></div>
+  </div>
+</div>
+
+<div class="grid-section">
+  <h2 id="gridTitle"></h2>
+  <p class="sub" id="gridSubtitle"></p>
+  <div class="matrix-wrapper">
+    <table class="matrix" id="matrixTable"></table>
+  </div>
+</div>
+
+<footer><span id="footerText"></span> &mdash; &copy; 2026 Maxim Masiutin</footer>
+
+<script>
+
+const T = {
+en: {
+  pageTitle: 'The McCumber Cube',
+  pageSubtitle: 'A three-dimensional framework for comprehensive information security analysis, introduced by John McCumber in 1991. The model creates 27 cells (3 x 3 x 3) that map every combination of security goals, data states, and countermeasure categories.',
+  axisGoals: 'Security Goals (CIA)',
+  axisStates: 'Data States',
+  axisMeasures: 'Countermeasures',
+  btnSpin: 'Auto-Rotate',
+  btnReset: 'Reset View',
+  dim1: 'Security Goals (CIA Triad)',
+  dim2: 'Data States',
+  dim3: 'Countermeasures',
+  dimBadge: ['Dim 1','Dim 2','Dim 3'],
+  goals: ['Confidentiality','Integrity','Availability'],
+  goalsShort: ['Conf','Integ','Avail'],
+  states: ['At Rest','In Transit','In Processing'],
+  statesShort: ['Rest','Transit','Proc'],
+  measures: ['Technology','Policies & Practices','Education & Training'],
+  measuresShort: ['Tech','Policy','Edu'],
+  gridTitle: 'All 27 Cells of the McCumber Cube',
+  gridSubtitle: 'Each cell represents a concrete security requirement at the intersection of a security goal, a data state, and a countermeasure category. Thorough security planning addresses all 27.',
+  footer: 'McCumber Cube Interactive Schematic',
+  selectCombo: 'Select a Combination',
+  selectComboDesc: 'Click one item from each dimension above, or click a cell on the 3D cube, to explore one of the 27 cells.',
+  howToRead: 'How to read the cube',
+  howToReadDesc: 'Pick a security goal (what to protect), a data state (where to protect it), and a countermeasure type (how to protect it). The intersection defines a concrete security requirement.',
+  selectMore: 'Select one more dimension',
+  selectMoreDesc: 'Choose the remaining dimension to see the specific security requirement for this cell.',
+  cellOf27: 'This is 1 of 27 cells that must be addressed for comprehensive security coverage.',
+  dimNames: ['Security Goal','Data State','Countermeasure'],
+  descs: {
+    g0: 'Preventing unauthorized disclosure of information. Data should be accessible only to those with legitimate authorization.',
+    g1: 'Ensuring data has not been modified in an unauthorized or unintended manner. Data must remain accurate, consistent, and trustworthy.',
+    g2: 'Ensuring information and systems are accessible to authorized users when needed. Services must remain operational.',
+    s0: 'Information stored on media: hard drives, databases, USB drives, backup tapes, cloud storage. Threats include theft, unauthorized access, ransomware.',
+    s1: 'Information moving across networks: LANs, internet, wireless. Threats include eavesdropping, man-in-the-middle attacks, packet sniffing.',
+    s2: 'Information being used in CPU and memory: created, modified, computed. Threats include buffer overflows, memory scraping, unauthorized process access.',
+    m0: 'Hardware and software security controls: encryption, firewalls, IDS/IPS, antivirus, access control mechanisms, HSMs.',
+    m1: 'Rules, procedures, and guidelines: acceptable use policies, incident response plans, access control policies, compliance requirements.',
+    m2: 'Programs that ensure people understand risks and responsibilities: security awareness training, phishing simulations, professional development.'
+  },
+  combos: [
+    ['Encryption of Stored Data','Use AES-256 full-disk encryption, database Transparent Data Encryption (TDE), and encrypted file systems to prevent unauthorized access to stored information.'],
+    ['Encryption in Transit','Deploy TLS 1.3 for web traffic, VPN tunnels (WireGuard, IPSec) for remote access, and SSH for administrative connections to prevent eavesdropping.'],
+    ['Confidential Computing','Use hardware-based trusted execution environments (Intel SGX, AMD SEV) and encrypted memory to protect data while it is being processed in CPU and RAM.'],
+    ['Data Integrity at Rest','Apply cryptographic checksums (SHA-256), database integrity constraints, and WORM storage to detect and prevent unauthorized modification of stored data.'],
+    ['Data Integrity in Transit','Use digital signatures, TLS message authentication codes, and HMAC verification to ensure data is not altered during network transmission.'],
+    ['Memory and Process Integrity','Implement memory protection (ASLR, DEP, Control Flow Guard), code signing, and secure enclaves to prevent unauthorized modification of data in processing.'],
+    ['Storage Availability','Deploy RAID arrays, replicated storage, and automated backups with integrity verification to ensure stored data remains accessible despite hardware failures.'],
+    ['Network Availability','Implement redundant network links, load balancers, CDN, and DDoS mitigation services to maintain network connectivity.'],
+    ['Processing Availability','Use server clustering, automatic failover, container orchestration (Kubernetes), and auto-scaling to ensure computing resources remain available.'],
+    ['Access Control Policies','Define data classification levels, implement least-privilege access rules, maintain access control lists, and enforce clean desk policies.'],
+    ['Transmission Security Policies','Mandate encryption for all data in transit, require VPN usage for remote work, define approved transfer protocols.'],
+    ['Session Security Policies','Define screen lock timeout requirements, establish session management rules, mandate memory clearing procedures, enforce MFA.'],
+    ['Change Management','Establish change management procedures, enforce version control policies, require audit trails for all data modifications.'],
+    ['Transaction Integrity Policies','Require digital signatures for financial transactions, define data validation standards, establish non-repudiation policies.'],
+    ['Development Security Policies','Mandate input validation standards, require peer code reviews, enforce separation of duties, define secure coding standards.'],
+    ['Backup and Recovery Plans','Define backup schedules with RPO/RTO targets, create disaster recovery plans, establish SLA definitions, test recovery procedures.'],
+    ['Network Continuity Policies','Define network redundancy requirements, plan bandwidth capacity, establish incident response procedures for outages.'],
+    ['Business Continuity Planning','Create business continuity plans, define capacity planning, schedule maintenance windows, set uptime targets.'],
+    ['Data Handling Training','Train employees on proper data classification and handling, recognizing social engineering, reporting unauthorized access.'],
+    ['Secure Communication Training','Train employees to use VPN, recognize insecure connections (HTTP vs HTTPS), avoid transmitting sensitive data over public Wi-Fi.'],
+    ['Operational Security Awareness','Train employees to lock screens, recognize shoulder surfing, use applications safely to prevent data exposure during processing.'],
+    ['Data Integrity Awareness','Educate users about data tampering risks, teach them to verify data sources, establish procedures for reporting anomalies.'],
+    ['Communication Verification Skills','Train users to verify email authenticity (DKIM, SPF), recognize man-in-the-middle indicators, understand certificate warnings.'],
+    ['Secure Development Training','Provide secure coding training, build input validation awareness, develop code review skills, practice threat modeling.'],
+    ['Recovery Drills','Conduct backup verification drills, run disaster recovery tabletop exercises, simulate data loss scenarios.'],
+    ['Network Incident Training','Train staff to recognize DDoS symptoms, report network issues promptly, follow failover procedures.'],
+    ['Operational Resilience Training','Train staff on system restart procedures, escalation protocols, conduct regular incident response drills.']
+  ],
+  matrix: [
+    ['AES-256 full disk encryption; database encryption (TDE); encrypted USB drives',
+     'TLS 1.3 for web traffic; VPN tunnels (WireGuard, IPSec); SSH for remote access',
+     'Confidential computing (Intel SGX, AMD SEV); encrypted memory; HSMs',
+     'Cryptographic checksums (SHA-256); database integrity constraints; WORM storage',
+     'Digital signatures; TLS message authentication; HMAC verification',
+     'Memory protection (ASLR, DEP); code signing; secure enclaves',
+     'RAID arrays; replicated storage; automated backups with verification',
+     'Redundant network links; load balancers; CDN; DDoS mitigation',
+     'Clustering; failover systems; Kubernetes; auto-scaling'],
+    ['Data classification policies; access control lists; least-privilege; clean desk policy',
+     'Encryption-in-transit mandates; VPN usage requirements; approved transfer protocols',
+     'Screen lock timeouts; session management rules; memory clearing procedures',
+     'Change management procedures; version control policies; audit trail requirements',
+     'Digital signature requirements; data validation standards; non-repudiation policies',
+     'Input validation standards; code review requirements; separation of duties',
+     'Backup schedules (RPO/RTO); disaster recovery plans; SLA definitions',
+     'Network redundancy requirements; bandwidth planning; incident response for outages',
+     'Business continuity plans; capacity planning; maintenance windows; uptime targets'],
+    ['Data handling training; recognizing social engineering; reporting unauthorized access',
+     'VPN usage training; recognizing insecure connections; avoiding public Wi-Fi risks',
+     'Locking screens; recognizing shoulder surfing; safe application usage',
+     'Data tampering awareness; verifying data sources; reporting anomalies',
+     'Verifying email authenticity; recognizing MitM indicators; certificate warnings',
+     'Secure coding training; input validation awareness; code review skills',
+     'Backup verification drills; disaster recovery exercises; tabletop simulations',
+     'Recognizing DDoS symptoms; reporting network issues; failover procedure training',
+     'System restart procedures; escalation protocols; incident response drills']
+  ]
+},
+
+ro: {
+  pageTitle: 'Cubul McCumber',
+  pageSubtitle: 'Un cadru tridimensional pentru analiza completa a securitatii informationale, introdus de John McCumber in 1991. Modelul creeaza 27 de celule (3 x 3 x 3) care acopera fiecare combinatie de obiective de securitate, stari ale datelor si categorii de contramasuri.',
+  axisGoals: 'Obiective de securitate (CID)',
+  axisStates: 'Starile datelor',
+  axisMeasures: 'Contramasuri',
+  btnSpin: 'Rotire automata',
+  btnReset: 'Resetare',
+  dim1: 'Obiective de securitate (Triada CID)',
+  dim2: 'Starile datelor',
+  dim3: 'Contramasuri',
+  dimBadge: ['Dim 1','Dim 2','Dim 3'],
+  goals: ['Confidentialitate','Integritate','Disponibilitate'],
+  goalsShort: ['Conf','Integ','Disp'],
+  states: ['In repaus','In tranzit','In utilizare'],
+  statesShort: ['Repaus','Tranzit','Utiliz'],
+  measures: ['Tehnologie','Politici si practici','Educatie si instruire'],
+  measuresShort: ['Tehn','Polit','Educ'],
+  gridTitle: 'Toate cele 27 de celule ale Cubului McCumber',
+  gridSubtitle: 'Fiecare celula reprezinta o cerinta concreta de securitate la intersectia unui obiectiv de securitate, a unei stari a datelor si a unei categorii de contramasuri. Planificarea riguroasa a securitatii le abordeaza pe toate 27.',
+  footer: 'Schema Interactiva a Cubului McCumber',
+  selectCombo: 'Selectati o combinatie',
+  selectComboDesc: 'Faceti clic pe un element din fiecare dimensiune de mai sus, sau pe o celula a cubului 3D, pentru a explora una dintre cele 27 de celule.',
+  howToRead: 'Cum se citeste cubul',
+  howToReadDesc: 'Alegeti un obiectiv de securitate (ce sa protejati), o stare a datelor (unde sa protejati) si un tip de contramasura (cum sa protejati). Intersectia defineste o cerinta concreta de securitate.',
+  selectMore: 'Selectati inca o dimensiune',
+  selectMoreDesc: 'Alegeti dimensiunea ramasa pentru a vedea cerinta specifica de securitate pentru aceasta celula.',
+  cellOf27: 'Aceasta este 1 din 27 de celule care trebuie abordate pentru o acoperire completa a securitatii.',
+  dimNames: ['Obiectiv de securitate','Starea datelor','Contramasura'],
+  descs: {
+    g0: 'Prevenirea dezvaluirii neautorizate a informatiilor. Datele ar trebui sa fie accesibile doar celor cu autorizare legitima.',
+    g1: 'Asigurarea ca datele nu au fost modificate in mod neautorizat sau neintentionat. Datele trebuie sa ramana exacte, consistente si de incredere.',
+    g2: 'Asigurarea ca informatiile si sistemele sunt accesibile utilizatorilor autorizati cand este necesar. Serviciile trebuie sa ramana operationale.',
+    s0: 'Informatii stocate pe suporturi: hard disk-uri, baze de date, memorii USB, benzi de backup, stocare cloud. Amenintari: furt, acces neautorizat, ransomware.',
+    s1: 'Informatii care circula prin retele: LAN-uri, internet, wireless. Amenintari: interceptare, atacuri man-in-the-middle, interceptarea pachetelor.',
+    s2: 'Informatii utilizate in CPU si memorie: create, modificate, calculate. Amenintari: depasiri de buffer, malware de tip memory scraping, acces neautorizat la procese.',
+    m0: 'Controale hardware si software: criptare, paravane de protectie, IDS/IPS, antivirus, mecanisme de control al accesului, HSM-uri.',
+    m1: 'Reguli, proceduri si orientari: politici de utilizare acceptabila, planuri de raspuns la incidente, politici de control al accesului, cerinte de conformitate.',
+    m2: 'Programe care asigura ca personalul intelege riscurile si responsabilitatile: instruire privind constientizarea securitatii, simulari de phishing, dezvoltare profesionala.'
+  },
+  combos: [
+    ['Criptarea datelor stocate','Utilizarea criptarii AES-256 pentru intregul disc, criptare transparenta a bazelor de date (TDE) si sisteme de fisiere criptate pentru prevenirea accesului neautorizat.'],
+    ['Criptare in tranzit','Implementarea TLS 1.3 pentru traficul web, tuneluri VPN (WireGuard, IPSec) pentru acces la distanta si SSH pentru conexiuni administrative.'],
+    ['Calcul confidential','Utilizarea mediilor de executie de incredere bazate pe hardware (Intel SGX, AMD SEV) si memorie criptata pentru protectia datelor in timpul procesarii.'],
+    ['Integritatea datelor in repaus','Aplicarea sumelor de control criptografice (SHA-256), constrangerilor de integritate ale bazelor de date si stocarii WORM.'],
+    ['Integritatea datelor in tranzit','Utilizarea semnaturilor digitale, codurilor de autentificare TLS si verificarii HMAC pentru asigurarea ca datele nu sunt alterate.'],
+    ['Integritatea memoriei si proceselor','Implementarea protectiei memoriei (ASLR, DEP), semnarea codului si enclave securizate pentru prevenirea modificarilor neautorizate.'],
+    ['Disponibilitatea stocarii','Implementarea matricelor RAID, stocare replicata si copii de siguranta automatizate cu verificarea integritatii.'],
+    ['Disponibilitatea retelei','Implementarea legaturilor de retea redundante, echilibrarea incarcaturii, CDN si servicii de atenuare DDoS.'],
+    ['Disponibilitatea procesarii','Utilizarea clusterizarii, failover automat, orchestrare de containere (Kubernetes) si scalare automata.'],
+    ['Politici de control al accesului','Definirea nivelurilor de clasificare, reguli de privilegiu minim, liste de control al accesului si politica biroului curat.'],
+    ['Politici de securitate a transmisiei','Obligativitatea criptarii pentru datele in tranzit, cerinte de utilizare VPN, protocoale de transfer aprobate.'],
+    ['Politici de securitate a sesiunilor','Cerinte de timeout, reguli de gestionare a sesiunilor, proceduri de curatare a memoriei, autentificare multi-factor.'],
+    ['Gestionarea schimbarilor','Proceduri de gestionare a schimbarilor, politici de control al versiunilor, cerinte de jurnal de audit.'],
+    ['Politici de integritate a tranzactiilor','Cerinte de semnatura digitala pentru tranzactii financiare, standarde de validare a datelor, politici de non-repudiere.'],
+    ['Politici de securitate a dezvoltarii','Standarde de validare a datelor de intrare, cerinte de revizuire a codului, separarea atributiilor.'],
+    ['Planuri de backup si recuperare','Programari de backup cu obiective RPO/RTO, planuri de recuperare in caz de dezastru, definitii SLA.'],
+    ['Politici de continuitate a retelei','Cerinte de redundanta a retelei, planificarea capacitatii, proceduri de raspuns la intreruperi.'],
+    ['Planificarea continuitatii afacerii','Planuri de continuitate, planificarea capacitatii, ferestre de mentenanta, obiective de disponibilitate.'],
+    ['Instruire privind gestionarea datelor','Instruirea angajatilor privind clasificarea si gestionarea datelor, recunoasterea ingineriei sociale, raportarea accesului neautorizat.'],
+    ['Instruire privind comunicatii securizate','Instruirea angajatilor privind utilizarea VPN, recunoasterea conexiunilor nesigure, evitarea Wi-Fi public.'],
+    ['Constientizarea securitatii operationale','Instruirea angajatilor privind blocarea ecranului, recunoasterea supravegherii vizuale, utilizarea sigura a aplicatiilor.'],
+    ['Constientizarea integritatii datelor','Educarea utilizatorilor despre riscurile de falsificare a datelor, verificarea surselor, proceduri de raportare a anomaliilor.'],
+    ['Competente de verificare a comunicatiilor','Instruirea utilizatorilor privind verificarea autenticitatii e-mailurilor, recunoasterea indicatorilor MitM, avertismente privind certificatele.'],
+    ['Instruire privind dezvoltarea securizata','Instruire in programare securizata, constientizarea validarii datelor de intrare, competente de revizuire a codului.'],
+    ['Exercitii de recuperare','Exercitii de verificare a backup-urilor, simulari de recuperare in caz de dezastru, scenarii de pierdere a datelor.'],
+    ['Instruire privind incidentele de retea','Instruirea personalului privind recunoasterea simptomelor DDoS, raportarea problemelor de retea, proceduri de failover.'],
+    ['Instruire privind rezilienta operationala','Instruirea personalului privind procedurile de repornire, protocoale de escaladare, exercitii de raspuns la incidente.']
+  ],
+  matrix: [
+    ['Criptare AES-256 disc complet; criptare baze de date (TDE); memorii USB criptate',
+     'TLS 1.3 pentru trafic web; tuneluri VPN (WireGuard, IPSec); SSH pentru acces la distanta',
+     'Calcul confidential (Intel SGX, AMD SEV); memorie criptata; HSM-uri',
+     'Sume de control criptografice (SHA-256); constrangeri de integritate; stocare WORM',
+     'Semnaturi digitale; autentificarea mesajelor TLS; verificare HMAC',
+     'Protectia memoriei (ASLR, DEP); semnarea codului; enclave securizate',
+     'Matrice RAID; stocare replicata; backup-uri automate cu verificare',
+     'Legaturi de retea redundante; echilibrarea incarcaturii; CDN; atenuare DDoS',
+     'Clusterizare; sisteme failover; Kubernetes; scalare automata'],
+    ['Politici de clasificare a datelor; liste de control al accesului; privilegiu minim; birou curat',
+     'Obligativitatea criptarii in tranzit; cerinte VPN; protocoale de transfer aprobate',
+     'Timeout blocarea ecranului; reguli de gestionare a sesiunilor; curatarea memoriei',
+     'Proceduri de gestionare a schimbarilor; politici de control al versiunilor; cerinte de audit',
+     'Cerinte de semnatura digitala; standarde de validare a datelor; politici de non-repudiere',
+     'Standarde de validare a datelor de intrare; cerinte de revizuire a codului; separarea atributiilor',
+     'Programari backup (RPO/RTO); planuri de recuperare in caz de dezastru; definitii SLA',
+     'Cerinte de redundanta a retelei; planificarea capacitatii; raspuns la intreruperi',
+     'Planuri de continuitate a afacerii; planificarea capacitatii; ferestre de mentenanta'],
+    ['Instruire privind gestionarea datelor; recunoasterea ingineriei sociale; raportarea accesului neautorizat',
+     'Instruire utilizare VPN; recunoasterea conexiunilor nesigure; evitarea riscurilor Wi-Fi public',
+     'Blocarea ecranului; recunoasterea supravegherii vizuale; utilizarea sigura a aplicatiilor',
+     'Constientizarea riscurilor de falsificare; verificarea surselor de date; raportarea anomaliilor',
+     'Verificarea autenticitatii e-mailurilor; recunoasterea indicatorilor MitM; avertismente certificat',
+     'Instruire programare securizata; constientizarea validarii datelor; competente de revizuire cod',
+     'Exercitii verificare backup; exercitii de recuperare in caz de dezastru; simulari',
+     'Recunoasterea simptomelor DDoS; raportarea problemelor de retea; instruire proceduri failover',
+     'Proceduri de repornire a sistemelor; protocoale de escaladare; exercitii de raspuns la incidente']
+  ]
+},
+
+ru: {
+  pageTitle: 'Куб МакКамбера',
+  pageSubtitle: 'Трёхмерная модель для комплексного анализа информационной безопасности, предложенная Джоном МакКамбером в 1991 году. Модель создаёт 27 ячеек (3 x 3 x 3), охватывающих все комбинации целей безопасности, состояний данных и категорий контрмер.',
+  axisGoals: 'Цели безопасности (КЦД)',
+  axisStates: 'Состояния данных',
+  axisMeasures: 'Контрмеры',
+  btnSpin: 'Вращение',
+  btnReset: 'Сброс',
+  dim1: 'Цели безопасности (Триада КЦД)',
+  dim2: 'Состояния данных',
+  dim3: 'Контрмеры',
+  dimBadge: ['Изм. 1','Изм. 2','Изм. 3'],
+  goals: ['Конфиденциальность','Целостность','Доступность'],
+  goalsShort: ['Конф','Цел','Дост'],
+  states: ['В состоянии покоя','В процессе передачи','В процессе обработки'],
+  statesShort: ['Покой','Перед','Обраб'],
+  measures: ['Технологии','Политики и практики','Обучение и подготовка'],
+  measuresShort: ['Техн','Полит','Обуч'],
+  gridTitle: 'Все 27 ячеек Куба МакКамбера',
+  gridSubtitle: 'Каждая ячейка представляет конкретное требование безопасности на пересечении цели безопасности, состояния данных и категории контрмер. Тщательное планирование безопасности охватывает все 27.',
+  footer: 'Интерактивная схема Куба МакКамбера',
+  selectCombo: 'Выберите комбинацию',
+  selectComboDesc: 'Нажмите на элемент из каждого измерения выше или на ячейку 3D-куба, чтобы исследовать одну из 27 ячеек.',
+  howToRead: 'Как читать куб',
+  howToReadDesc: 'Выберите цель безопасности (что защищать), состояние данных (где защищать) и тип контрмеры (как защищать). Пересечение определяет конкретное требование безопасности.',
+  selectMore: 'Выберите ещё одно измерение',
+  selectMoreDesc: 'Выберите оставшееся измерение, чтобы увидеть конкретное требование безопасности для данной ячейки.',
+  cellOf27: 'Это 1 из 27 ячеек, которые необходимо проработать для комплексного обеспечения безопасности.',
+  dimNames: ['Цель безопасности','Состояние данных','Контрмера'],
+  descs: {
+    g0: 'Предотвращение несанкционированного раскрытия информации. Данные должны быть доступны только тем, кто имеет законное разрешение.',
+    g1: 'Обеспечение того, что данные не были изменены несанкционированным или непреднамеренным образом. Данные должны оставаться точными, согласованными и достоверными.',
+    g2: 'Обеспечение доступности информации и систем для авторизованных пользователей, когда это необходимо. Сервисы должны оставаться работоспособными.',
+    s0: 'Информация, хранящаяся на носителях: жёсткие диски, базы данных, USB-накопители, резервные ленты, облачное хранилище. Угрозы: кража, несанкционированный доступ, программы-вымогатели.',
+    s1: 'Информация, передаваемая по сетям: LAN, интернет, беспроводные сети. Угрозы: перехват, атаки "человек посередине", перехват пакетов.',
+    s2: 'Информация, используемая в процессоре и памяти: создаваемая, изменяемая, обрабатываемая. Угрозы: переполнение буфера, вредоносное ПО для извлечения данных из памяти, несанкционированный доступ к процессам.',
+    m0: 'Аппаратные и программные средства защиты: шифрование, межсетевые экраны, IDS/IPS, антивирусы, механизмы управления доступом, аппаратные модули безопасности.',
+    m1: 'Правила, процедуры и руководства: политики допустимого использования, планы реагирования на инциденты, политики управления доступом, требования соответствия.',
+    m2: 'Программы, обеспечивающие понимание рисков и обязанностей: обучение по информационной безопасности, симуляции фишинга, повышение квалификации.'
+  },
+  combos: [
+    ['Шифрование хранимых данных','Использование AES-256 для полного шифрования дисков, прозрачного шифрования баз данных (TDE) и зашифрованных файловых систем для предотвращения несанкционированного доступа.'],
+    ['Шифрование при передаче','Развёртывание TLS 1.3 для веб-трафика, VPN-туннелей (WireGuard, IPSec) для удалённого доступа и SSH для административных подключений.'],
+    ['Конфиденциальные вычисления','Использование доверенных сред выполнения на аппаратной основе (Intel SGX, AMD SEV) и зашифрованной памяти для защиты данных при обработке.'],
+    ['Целостность хранимых данных','Применение криптографических контрольных сумм (SHA-256), ограничений целостности баз данных и хранилищ WORM.'],
+    ['Целостность данных при передаче','Использование цифровых подписей, кодов аутентификации сообщений TLS и проверки HMAC для обеспечения неизменности данных.'],
+    ['Целостность памяти и процессов','Реализация защиты памяти (ASLR, DEP), подписи кода и безопасных анклавов для предотвращения несанкционированных изменений.'],
+    ['Доступность хранилища','Развёртывание массивов RAID, реплицированного хранилища и автоматизированного резервного копирования с проверкой целостности.'],
+    ['Доступность сети','Реализация резервных сетевых каналов, балансировщиков нагрузки, CDN и сервисов защиты от DDoS.'],
+    ['Доступность обработки','Использование кластеризации серверов, автоматического переключения, оркестрации контейнеров (Kubernetes) и автомасштабирования.'],
+    ['Политики управления доступом','Определение уровней классификации данных, правил минимальных привилегий, списков управления доступом и политики чистого рабочего стола.'],
+    ['Политики безопасности передачи','Обязательное шифрование данных при передаче, требования использования VPN, утверждённые протоколы передачи.'],
+    ['Политики безопасности сеансов','Требования блокировки экрана по тайм-ауту, правила управления сеансами, процедуры очистки памяти, многофакторная аутентификация.'],
+    ['Управление изменениями','Процедуры управления изменениями, политики контроля версий, требования журнала аудита для всех модификаций.'],
+    ['Политики целостности транзакций','Требования цифровой подписи для финансовых операций, стандарты валидации данных, политики неотрекаемости.'],
+    ['Политики безопасности разработки','Стандарты валидации входных данных, требования рецензирования кода, разделение обязанностей.'],
+    ['Планы резервного копирования и восстановления','Расписания резервного копирования с целями RPO/RTO, планы аварийного восстановления, определения SLA.'],
+    ['Политики непрерывности сети','Требования резервирования сети, планирование пропускной способности, процедуры реагирования на сбои.'],
+    ['Планирование непрерывности бизнеса','Планы непрерывности бизнеса, планирование мощностей, окна обслуживания, целевые показатели доступности.'],
+    ['Обучение обращению с данными','Обучение сотрудников правильной классификации и обращению с данными, распознаванию социальной инженерии, сообщению о несанкционированном доступе.'],
+    ['Обучение безопасным коммуникациям','Обучение сотрудников использованию VPN, распознаванию незащищённых соединений, избеганию передачи данных через публичный Wi-Fi.'],
+    ['Осведомлённость об операционной безопасности','Обучение сотрудников блокировке экрана, распознаванию подглядывания через плечо, безопасному использованию приложений.'],
+    ['Осведомлённость о целостности данных','Обучение пользователей рискам фальсификации данных, проверке источников данных, процедурам сообщения об аномалиях.'],
+    ['Навыки проверки коммуникаций','Обучение пользователей проверке подлинности электронной почты (DKIM, SPF), распознаванию признаков MitM, пониманию предупреждений о сертификатах.'],
+    ['Обучение безопасной разработке','Обучение безопасному программированию, осведомлённость о валидации входных данных, навыки рецензирования кода, моделирование угроз.'],
+    ['Учения по восстановлению','Учения по проверке резервных копий, кабинетные учения по аварийному восстановлению, моделирование сценариев потери данных.'],
+    ['Обучение реагированию на сетевые инциденты','Обучение персонала распознаванию симптомов DDoS, оперативному сообщению о проблемах, следованию процедурам переключения.'],
+    ['Обучение операционной устойчивости','Обучение персонала процедурам перезапуска систем, протоколам эскалации, регулярные учения по реагированию на инциденты.']
+  ],
+  matrix: [
+    ['Шифрование AES-256 полного диска; шифрование БД (TDE); зашифрованные USB',
+     'TLS 1.3 для веб-трафика; VPN-туннели (WireGuard, IPSec); SSH',
+     'Конфиденциальные вычисления (Intel SGX, AMD SEV); зашифрованная память; HSM',
+     'Криптографические контрольные суммы (SHA-256); ограничения целостности БД; WORM',
+     'Цифровые подписи; аутентификация сообщений TLS; проверка HMAC',
+     'Защита памяти (ASLR, DEP); подпись кода; безопасные анклавы',
+     'Массивы RAID; реплицированное хранилище; автоматическое резервное копирование',
+     'Резервные сетевые каналы; балансировщики нагрузки; CDN; защита от DDoS',
+     'Кластеризация; отказоустойчивые системы; Kubernetes; автомасштабирование'],
+    ['Политики классификации данных; списки управления доступом; минимальные привилегии',
+     'Обязательное шифрование при передаче; требования VPN; утверждённые протоколы',
+     'Тайм-аут блокировки экрана; правила управления сеансами; очистка памяти',
+     'Процедуры управления изменениями; политики контроля версий; требования аудита',
+     'Требования цифровой подписи; стандарты валидации; политики неотрекаемости',
+     'Стандарты валидации входных данных; требования рецензирования кода; разделение обязанностей',
+     'Расписания резервного копирования (RPO/RTO); планы аварийного восстановления; SLA',
+     'Требования резервирования сети; планирование пропускной способности; реагирование на сбои',
+     'Планы непрерывности бизнеса; планирование мощностей; окна обслуживания'],
+    ['Обучение обращению с данными; распознавание социальной инженерии; сообщение о нарушениях',
+     'Обучение использованию VPN; распознавание незащищённых соединений; риски Wi-Fi',
+     'Блокировка экрана; распознавание подглядывания; безопасное использование приложений',
+     'Осведомлённость о рисках фальсификации; проверка источников; сообщение об аномалиях',
+     'Проверка подлинности e-mail; распознавание признаков MitM; предупреждения о сертификатах',
+     'Обучение безопасному программированию; валидация входных данных; рецензирование кода',
+     'Учения по проверке копий; учения по аварийному восстановлению; кабинетные учения',
+     'Распознавание симптомов DDoS; сообщение о проблемах сети; процедуры переключения',
+     'Процедуры перезапуска систем; протоколы эскалации; учения по реагированию на инциденты']
+  ]
+}
+};
+
+
+let lang = 'en';
+let L = T.en;
+const sel = [null, null, null];
+
+function setLang(l) {
+  lang = l;
+  L = T[l];
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === l.toUpperCase()));
+  document.documentElement.lang = l;
+  sel[0] = sel[1] = sel[2] = null;
+  renderAll();
+}
+
+function renderAll() {
+  document.title = L.pageTitle;
+  document.getElementById('pageTitle').textContent = L.pageTitle;
+  document.getElementById('pageSubtitle').textContent = L.pageSubtitle;
+  document.getElementById('btnSpin').textContent = L.btnSpin;
+  document.getElementById('btnReset').textContent = L.btnReset;
+  document.getElementById('gridTitle').textContent = L.gridTitle;
+  document.getElementById('gridSubtitle').textContent = L.gridSubtitle;
+  document.getElementById('footerText').textContent = L.footer;
+
+  document.getElementById('axisLabels').innerHTML =
+    '<div class="axis-label"><div class="axis-dot x"></div> '+L.axisGoals+'</div>' +
+    '<div class="axis-label"><div class="axis-dot y"></div> '+L.axisStates+'</div>' +
+    '<div class="axis-label"><div class="axis-dot z"></div> '+L.axisMeasures+'</div>';
+
+  const cards = document.getElementById('dimCards');
+  const cls = ['x-card','y-card','z-card'];
+  const titles = [L.dim1, L.dim2, L.dim3];
+  const lists = [L.goals, L.states, L.measures];
+  let html = '';
+  for (let d = 0; d < 3; d++) {
+    html += '<div class="dim-card '+cls[d]+'"><h3><span class="badge">'+L.dimBadge[d]+'</span> '+titles[d]+'</h3><div class="items">';
+    for (let i = 0; i < lists[d].length; i++) {
+      html += '<div class="item" data-dim="'+d+'" data-idx="'+i+'" onclick="clickDimItem(this)">'+lists[d][i]+'</div>';
+    }
+    html += '</div></div>';
+  }
+  cards.innerHTML = html;
+
+  buildMatrix();
+
+  buildFaces();
+
+  updateDetail();
+}
+
+const faceMap = {
+  front: [
+    [0,0,2],[0,1,2],[0,2,2],
+    [1,0,2],[1,1,2],[1,2,2],
+    [2,0,2],[2,1,2],[2,2,2]
+  ],
+  right: [
+    [2,0,0],[2,0,1],[2,0,2],
+    [2,1,0],[2,1,1],[2,1,2],
+    [2,2,0],[2,2,1],[2,2,2]
+  ],
+  top: [
+    [0,2,0],[0,2,1],[0,2,2],
+    [1,2,0],[1,2,1],[1,2,2],
+    [2,2,0],[2,2,1],[2,2,2]
+  ]
+};
+
+function cellLabel(g,s,m) {
+  return L.goalsShort[g] + ' ' + L.statesShort[s] + ' ' + L.measuresShort[m];
+}
+
+function cellTooltip(g,s,m) {
+  return L.goals[g] + ' + ' + L.states[s] + ' + ' + L.measures[m];
+}
+
+function buildFaces() {
+  ['front','right','top'].forEach(face => {
+    const el = document.getElementById('face' + face.charAt(0).toUpperCase() + face.slice(1));
+    if (!el) return;
+    const cells = faceMap[face];
+    el.innerHTML = '';
+    cells.forEach(([g,s,m]) => {
+      const cell = document.createElement('div');
+      cell.className = 'cube-cell';
+      cell.textContent = cellLabel(g,s,m);
+      cell.title = cellTooltip(g,s,m);
+      cell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        cubeCellClick(g,s,m);
+      });
+      el.appendChild(cell);
+    });
+  });
+
+  ['back','left','bottom'].forEach(cls => {
+    const face = document.querySelector('.cube-face.'+cls);
+    if (!face) return;
+    face.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cube-cell';
+      cell.style.opacity = '0.5';
+      face.appendChild(cell);
+    }
+  });
+}
+
+function cubeCellClick(g,s,m) {
+  sel[0] = g; sel[1] = s; sel[2] = m;
+  syncAll();
+  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function clickDimItem(el) {
+  const d = parseInt(el.dataset.dim);
+  const i = parseInt(el.dataset.idx);
+  if (sel[d] === i) { sel[d] = null; } else { sel[d] = i; }
+  syncAll();
+}
+
+function syncAll() {
+  syncDimButtons();
+  syncCubeHighlight();
+  syncMatrixHighlight();
+  updateDetail();
+}
+
+function syncDimButtons() {
+  const items = document.querySelectorAll('.dim-card .item');
+  items.forEach(it => {
+    const d = parseInt(it.dataset.dim);
+    const i = parseInt(it.dataset.idx);
+    it.classList.toggle('selected', sel[d] === i);
+  });
+}
+
+function cellMatches(g, s, m) {
+  return (sel[0] === null || sel[0] === g) &&
+         (sel[1] === null || sel[1] === s) &&
+         (sel[2] === null || sel[2] === m) &&
+         (sel[0] !== null || sel[1] !== null || sel[2] !== null);
+}
+
+function syncCubeHighlight() {
+  ['front','right','top'].forEach(face => {
+    const el = document.getElementById('face' + face.charAt(0).toUpperCase() + face.slice(1));
+    if (!el) return;
+    const cells = faceMap[face];
+    const children = el.children;
+    for (let i = 0; i < cells.length; i++) {
+      const [g,s,m] = cells[i];
+      children[i].classList.toggle('highlight', cellMatches(g,s,m));
+    }
+  });
+}
+
+function syncMatrixHighlight() {
+  const tds = document.querySelectorAll('#matrixTable td[data-g]');
+  tds.forEach(td => {
+    const g = parseInt(td.dataset.g);
+    const s = parseInt(td.dataset.s);
+    const m = parseInt(td.dataset.m);
+    td.classList.toggle('highlight', cellMatches(g,s,m));
+  });
+}
+
+function comboIndex(g, s, m) {
+  return m * 9 + g * 3 + s;
+}
+
+function updateDetail() {
+  const panel = document.getElementById('detailPanel');
+  const filled = sel.filter(x => x !== null).length;
+  const lists = [L.goals, L.states, L.measures];
+  const clsArr = ['x','y','z'];
+
+  if (filled === 0) {
+    panel.innerHTML = '<h3>'+L.selectCombo+'</h3><p>'+L.selectComboDesc+'</p>' +
+      '<div class="example"><strong>'+L.howToRead+'</strong><p>'+L.howToReadDesc+'</p></div>';
+  } else if (filled === 1) {
+    const dim = sel.findIndex(x => x !== null);
+    const name = lists[dim][sel[dim]];
+    const descKey = ['g','s','m'][dim] + sel[dim];
+    panel.innerHTML = '<h3>'+name+'</h3>' +
+      '<div class="combo-label"><span class="tag '+clsArr[dim]+'">'+L.dimNames[dim]+'</span></div>' +
+      '<p>'+L.descs[descKey]+'</p>';
+  } else if (filled === 2) {
+    let html = '<h3>'+L.selectMore+'</h3><div class="combo-label">';
+    sel.forEach((v,i) => { if (v !== null) html += '<span class="tag '+clsArr[i]+'">'+lists[i][v]+'</span>'; });
+    html += '</div><p>'+L.selectMoreDesc+'</p>';
+    panel.innerHTML = html;
+  } else {
+    const ci = comboIndex(sel[0], sel[1], sel[2]);
+    const combo = L.combos[ci];
+    let html = '<h3>'+combo[0]+'</h3><div class="combo-label">';
+    sel.forEach((v,i) => { html += '<span class="tag '+clsArr[i]+'">'+lists[i][v]+'</span>'; });
+    html += '</div><p>'+combo[1]+'</p>';
+    html += '<div class="example"><strong>'+L.goals[sel[0]]+' + '+L.states[sel[1]]+' + '+L.measures[sel[2]]+'</strong>';
+    html += '<p>'+L.cellOf27+'</p></div>';
+    panel.innerHTML = html;
+  }
+}
+
+function buildMatrix() {
+  const tbl = document.getElementById('matrixTable');
+  let html = '<thead><tr><th></th>';
+  for (let g = 0; g < 3; g++) {
+    const bgColors = ['rgba(99,102,241,0.3)','rgba(16,185,129,0.3)','rgba(245,158,11,0.3)'];
+    html += '<th colspan="3" style="background:'+bgColors[g]+'">'+L.goals[g]+'</th>';
+  }
+  html += '</tr><tr><th></th>';
+  const cellCls = ['conf','conf','conf','intg','intg','intg','avail','avail','avail'];
+  for (let g = 0; g < 3; g++) {
+    for (let s = 0; s < 3; s++) {
+      html += '<th class="'+cellCls[g*3]+'">'+L.states[s]+'</th>';
+    }
+  }
+  html += '</tr></thead><tbody>';
+  for (let m = 0; m < 3; m++) {
+    html += '<tr><th class="row-header">'+L.measures[m]+'</th>';
+    for (let g = 0; g < 3; g++) {
+      for (let s = 0; s < 3; s++) {
+        const cls = ['conf','intg','avail'][g];
+        html += '<td class="'+cls+'" data-g="'+g+'" data-s="'+s+'" data-m="'+m+'" onclick="matrixCellClick(this)">'+L.matrix[m][g*3+s]+'</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+function matrixCellClick(el) {
+  const g = parseInt(el.dataset.g);
+  const s = parseInt(el.dataset.s);
+  const m = parseInt(el.dataset.m);
+  cubeCellClick(g,s,m);
+}
+
+let spinning = true;
+function toggleSpin() {
+  spinning = !spinning;
+  const scene = document.getElementById('cubeScene');
+  const btn = document.getElementById('btnSpin');
+  if (spinning) { scene.classList.add('spin'); btn.classList.add('active'); }
+  else { scene.classList.remove('spin'); btn.classList.remove('active'); }
+}
+
+function resetCube() {
+  const scene = document.getElementById('cubeScene');
+  scene.classList.remove('spin');
+  spinning = false;
+  document.getElementById('btnSpin').classList.remove('active');
+  rotX = -25;
+  rotY = -35;
+  scene.style.transition = 'transform 0.6s ease';
+  scene.style.transform = 'rotateX(-25deg) rotateY(-35deg)';
+}
+
+let isDragging = false, startX, startY, rotX = -25, rotY = -35;
+const cubeContainer = document.querySelector('.cube-container');
+
+cubeContainer.addEventListener('mousedown', e => {
+  if (spinning) toggleSpin();
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  document.getElementById('cubeScene').style.transition = 'none';
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  rotY += dx * 0.5;
+  rotX -= dy * 0.5;
+  document.getElementById('cubeScene').style.transform = 'rotateX('+rotX+'deg) rotateY('+rotY+'deg)';
+  startX = e.clientX;
+  startY = e.clientY;
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  document.getElementById('cubeScene').style.transition = 'transform 0.6s ease';
+});
+
+renderAll();
+</script>
+</body>
+</html>

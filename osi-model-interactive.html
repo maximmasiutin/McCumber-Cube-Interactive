@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI Reference Model / Modelul OSI / Modeli OSI</title>
+<style>
+@font-face {
+  font-family: 'HelveticaNeueWorld';
+  src: url('../../../../Fonts/HelveticaNeueWorld/HelveticaNeueWorld-55Roman.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'HelveticaNeueWorld';
+  src: url('../../../../Fonts/HelveticaNeueWorld/HelveticaNeueWorld-75Bold.otf') format('opentype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'HelveticaNeueWorld';
+  src: url('../../../../Fonts/HelveticaNeueWorld/HelveticaNeueWorld-45Lt.otf') format('opentype');
+  font-weight: 300;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'HelveticaNeueWorld', 'Helvetica Neue', Arial, sans-serif;
+  background: #0a0a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.subtitle {
+  text-align: center;
+  font-weight: 300;
+  font-size: 1.1em;
+  color: #8888cc;
+  margin-bottom: 24px;
+}
+
+.lang-switch {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.lang-btn {
+  padding: 10px 28px;
+  border: 2px solid #4444aa;
+  background: transparent;
+  color: #aaaaee;
+  font-family: inherit;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.lang-btn:hover { background: #222266; }
+.lang-btn.active { background: #3333aa; color: #fff; border-color: #6666dd; }
+
+.osi-stack {
+  max-width: 800px;
+  margin: 0 auto 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layer {
+  display: grid;
+  grid-template-columns: 60px 60px 1fr 200px;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 8px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+
+.layer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(100,100,255,0.3);
+}
+
+.layer-num {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+.layer-emoji {
+  font-size: 2em;
+  text-align: center;
+}
+
+.layer-info {
+  padding-left: 12px;
+}
+
+.layer-name {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #fff;
+}
+
+.layer-desc {
+  font-weight: 300;
+  font-size: 0.9em;
+  color: rgba(255,255,255,0.7);
+  margin-top: 2px;
+}
+
+.layer-protocols {
+  text-align: right;
+  font-size: 0.85em;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+}
+
+@media (max-width: 760px) {
+  .layer {
+    grid-template-columns: 44px 44px 1fr;
+    gap: 6px;
+  }
+  .layer-protocols {
+    grid-column: 1 / -1;
+    text-align: left;
+    padding-left: 56px;
+  }
+}
+
+.layer-7 { background: linear-gradient(135deg, #7b2d8e, #5a1f6b); }
+.layer-6 { background: linear-gradient(135deg, #3b5998, #2d4373); }
+.layer-5 { background: linear-gradient(135deg, #1a6b4a, #0f4f35); }
+.layer-4 { background: linear-gradient(135deg, #b8860b, #8b6508); }
+.layer-3 { background: linear-gradient(135deg, #c0392b, #962d22); }
+.layer-2 { background: linear-gradient(135deg, #2874a6, #1b5c82); }
+.layer-1 { background: linear-gradient(135deg, #555, #333); }
+
+.section-title {
+  text-align: center;
+  font-size: 1.4em;
+  margin: 30px 0 16px;
+  color: #aaaaee;
+}
+
+.mnemonics {
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+.mnemonic-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 8px;
+}
+
+.mnemonic-card .direction {
+  font-size: 0.8em;
+  color: #8888cc;
+  margin-bottom: 4px;
+}
+
+.mnemonic-card .phrase {
+  font-size: 1.1em;
+  color: #fff;
+}
+
+.mnemonic-card .phrase b {
+  color: #ffcc44;
+  font-weight: 700;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.85em;
+  color: #555;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #222;
+}
+</style>
+</head>
+<body>
+
+<h1 id="title">OSI Reference Model</h1>
+<p class="subtitle" id="subtitle">Open Systems Interconnection - 7 Layers</p>
+
+<div class="lang-switch">
+  <button type="button" class="lang-btn active" data-lang="en" onclick="setLang('en')">English</button>
+  <button type="button" class="lang-btn" data-lang="ro" onclick="setLang('ro')">Rom&#226;n&#259;</button>
+  <button type="button" class="lang-btn" data-lang="ru" onclick="setLang('ru')">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</button>
+</div>
+
+<div class="osi-stack" id="osi-stack"></div>
+
+<h2 class="section-title" id="mnemonic-title">Mnemonic Phrases</h2>
+<div class="mnemonics" id="mnemonics"></div>
+
+<div class="footer">
+  Tehnologii ale Securitatii Informationale - UTM<br>
+  Lector: Maxim Masiutin
+</div>
+
+<script>
+const data = {
+  en: {
+    title: "OSI Reference Model",
+    subtitle: "Open Systems Interconnection - 7 Layers",
+    mnemonicTitle: "Mnemonic Phrases (bottom-to-top: P-D-N-T-S-P-A)",
+    layers: [
+      { num: 7, name: "Application", desc: "End-user services: HTTP, FTP, SMTP, DNS", protocols: "HTTP, FTP, SMTP, DNS", emoji: "\uD83D\uDCF1" },
+      { num: 6, name: "Presentation", desc: "Data formatting, encryption, compression", protocols: "SSL/TLS, JPEG, ASCII", emoji: "\uD83C\uDFA8" },
+      { num: 5, name: "Session", desc: "Session management and connections", protocols: "NetBIOS, RPC, PPTP", emoji: "\uD83E\uDD1D" },
+      { num: 4, name: "Transport", desc: "End-to-end delivery, flow control", protocols: "TCP, UDP", emoji: "\uD83D\uDE9A" },
+      { num: 3, name: "Network", desc: "Routing and IP addressing", protocols: "IP, ICMP, IPSec", emoji: "\uD83C\uDF10" },
+      { num: 2, name: "Data Link", desc: "Frame delivery, MAC addresses", protocols: "Ethernet, Wi-Fi, PPP", emoji: "\uD83D\uDD17" },
+      { num: 1, name: "Physical", desc: "Electrical/optical signals, cables", protocols: "USB, DSL, Bluetooth", emoji: "\uD83D\uDD0C" }
+    ],
+    mnemonics: [
+      { dir: "bottom-to-top (1\u21927)", phrase: "<b>P</b>lease <b>D</b>o <b>N</b>ot <b>T</b>hrow <b>S</b>ausage <b>P</b>izza <b>A</b>way" },
+      { dir: "bottom-to-top (1\u21927)", phrase: "<b>P</b>lease <b>D</b>o <b>N</b>ot <b>T</b>ell <b>S</b>ecret <b>P</b>asswords <b>A</b>nytime" },
+      { dir: "bottom-to-top (1\u21927)", phrase: "<b>P</b>eople <b>D</b>on't <b>N</b>eed <b>T</b>o <b>S</b>ee <b>P</b>aula <b>A</b>bdul" },
+      { dir: "bottom-to-top (1\u21927)", phrase: "<b>P</b>rofessors <b>D</b>o <b>N</b>ot <b>T</b>each <b>S</b>tudents <b>P</b>ointless <b>A</b>cronyms" },
+      { dir: "top-to-bottom (7\u21921)", phrase: "<b>A</b>ll <b>P</b>eople <b>S</b>eem <b>T</b>o <b>N</b>eed <b>D</b>ata <b>P</b>rocessing" },
+      { dir: "top-to-bottom (7\u21921)", phrase: "<b>A</b> <b>P</b>erson <b>S</b>tudying <b>T</b>echnology <b>N</b>eeds <b>D</b>edication <b>P</b>ermanently" },
+      { dir: "top-to-bottom (7\u21921)", phrase: "<b>A</b> <b>P</b>rudent <b>S</b>tudent <b>T</b>akes <b>N</b>otes <b>D</b>uring <b>P</b>resentations" }
+    ]
+  },
+  ro: {
+    title: "Modelul de Referin\u021B\u0103 OSI",
+    subtitle: "Interconectarea Sistemelor Deschise - 7 Niveluri",
+    mnemonicTitle: "Fraze Mnemonice (de jos \u00EEn sus: F-L-R-T-S-P-A)",
+    layers: [
+      { num: 7, name: "Aplica\u021Bie", desc: "Servicii pentru utilizator: HTTP, FTP, SMTP, DNS", protocols: "HTTP, FTP, SMTP, DNS", emoji: "\uD83D\uDCF1" },
+      { num: 6, name: "Prezentare", desc: "Formatarea datelor, criptare, compresie", protocols: "SSL/TLS, JPEG, ASCII", emoji: "\uD83C\uDFA8" },
+      { num: 5, name: "Sesiune", desc: "Gestionarea sesiunilor \u0219i conexiunilor", protocols: "NetBIOS, RPC, PPTP", emoji: "\uD83E\uDD1D" },
+      { num: 4, name: "Transport", desc: "Livrare de la cap\u0103t la cap\u0103t, control flux", protocols: "TCP, UDP", emoji: "\uD83D\uDE9A" },
+      { num: 3, name: "Re\u021Bea", desc: "Rutare \u0219i adresare IP", protocols: "IP, ICMP, IPSec", emoji: "\uD83C\uDF10" },
+      { num: 2, name: "Leg\u0103tur\u0103 de Date", desc: "Livrarea cadrelor, adrese MAC", protocols: "Ethernet, Wi-Fi, PPP", emoji: "\uD83D\uDD17" },
+      { num: 1, name: "Fizic", desc: "Semnale electrice/optice, cabluri", protocols: "USB, DSL, Bluetooth", emoji: "\uD83D\uDD0C" }
+    ],
+    mnemonics: [
+      { dir: "de jos \u00EEn sus (1\u21927)", phrase: "<b>F</b>iecare <b>L</b>ec\u021Bie <b>R</b>eprezint\u0103 <b>T</b>ehnici <b>S</b>igure <b>P</b>entru <b>A</b>plica\u021Bii" },
+      { dir: "de jos \u00EEn sus (1\u21927)", phrase: "<b>F</b>ii <b>L</b>ider, <b>R</b>ezolv\u0103 <b>T</b>otul <b>S</b>implu, <b>P</b>recis, <b>A</b>tentiv" },
+      { dir: "de jos \u00EEn sus (1\u21927)", phrase: "<b>F</b>olose\u0219te <b>L</b>ogica, <b>R</b>a\u021Bionalizeaz\u0103 <b>T</b>otul <b>S</b>istematic <b>P</b>entru <b>A</b>vantaj" }
+    ]
+  },
+  ru: {
+    title: "\u042D\u0442\u0430\u043B\u043E\u043D\u043D\u0430\u044F \u043C\u043E\u0434\u0435\u043B\u044C OSI",
+    subtitle: "\u041C\u043E\u0434\u0435\u043B\u044C \u0432\u0437\u0430\u0438\u043C\u043E\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0445 \u0441\u0438\u0441\u0442\u0435\u043C - 7 \u0443\u0440\u043E\u0432\u043D\u0435\u0439",
+    mnemonicTitle: "\u041C\u043D\u0435\u043C\u043E\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u0444\u0440\u0430\u0437\u044B (\u0441\u043D\u0438\u0437\u0443 \u0432\u0432\u0435\u0440\u0445: \u0424-\u041A-\u0421-\u0422-\u0421-\u041F-\u041F)",
+    layers: [
+      { num: 7, name: "\u041F\u0440\u0438\u043A\u043B\u0430\u0434\u043D\u043E\u0439", desc: "\u0421\u0435\u0440\u0432\u0438\u0441\u044B \u043A\u043E\u043D\u0435\u0447\u043D\u043E\u0433\u043E \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F: HTTP, FTP, SMTP, DNS", protocols: "HTTP, FTP, SMTP, DNS", emoji: "\uD83D\uDCF1" },
+      { num: 6, name: "\u041F\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043B\u0435\u043D\u0438\u044F", desc: "\u0424\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0445, \u0448\u0438\u0444\u0440\u043E\u0432\u0430\u043D\u0438\u0435, \u0441\u0436\u0430\u0442\u0438\u0435", protocols: "SSL/TLS, JPEG, ASCII", emoji: "\uD83C\uDFA8" },
+      { num: 5, name: "\u0421\u0435\u0430\u043D\u0441\u043E\u0432\u044B\u0439", desc: "\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0441\u0435\u0430\u043D\u0441\u0430\u043C\u0438 \u0438 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F\u043C\u0438", protocols: "NetBIOS, RPC, PPTP", emoji: "\uD83E\uDD1D" },
+      { num: 4, name: "\u0422\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442\u043D\u044B\u0439", desc: "\u0421\u043A\u0432\u043E\u0437\u043D\u0430\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0430, \u0443\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u043E\u0442\u043E\u043A\u043E\u043C", protocols: "TCP, UDP", emoji: "\uD83D\uDE9A" },
+      { num: 3, name: "\u0421\u0435\u0442\u0435\u0432\u043E\u0439", desc: "\u041C\u0430\u0440\u0448\u0440\u0443\u0442\u0438\u0437\u0430\u0446\u0438\u044F \u0438 IP-\u0430\u0434\u0440\u0435\u0441\u0430\u0446\u0438\u044F", protocols: "IP, ICMP, IPSec", emoji: "\uD83C\uDF10" },
+      { num: 2, name: "\u041A\u0430\u043D\u0430\u043B\u044C\u043D\u044B\u0439", desc: "\u041F\u0435\u0440\u0435\u0434\u0430\u0447\u0430 \u043A\u0430\u0434\u0440\u043E\u0432, MAC-\u0430\u0434\u0440\u0435\u0441\u0430", protocols: "Ethernet, Wi-Fi, PPP", emoji: "\uD83D\uDD17" },
+      { num: 1, name: "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043A\u0438\u0439", desc: "\u042D\u043B\u0435\u043A\u0442\u0440\u0438\u0447\u0435\u0441\u043A\u0438\u0435/\u043E\u043F\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u0441\u0438\u0433\u043D\u0430\u043B\u044B, \u043A\u0430\u0431\u0435\u043B\u0438", protocols: "USB, DSL, Bluetooth", emoji: "\uD83D\uDD0C" }
+    ],
+    mnemonics: [
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>акультет <b>К</b>омпьютерных <b>С</b>истем <b>Т</b>ребует <b>С</b>ерьёзной <b>П</b>одготовки <b>П</b>рограммистов" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>онари <b>К</b>расиво <b>С</b>ветят <b>Т</b>ёплым <b>С</b>ветом <b>П</b>о <b>П</b>роспекту" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>рукты <b>К</b>аждый <b>С</b>езон <b>Т</b>очно <b>С</b>озревают <b>П</b>о <b>П</b>лану" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>изики <b>К</b>аждый <b>С</b>еместр <b>Т</b>рудятся, <b>С</b>оздавая <b>П</b>рикладные <b>П</b>рограммы" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>утбольный <b>К</b>луб <b>С</b>партак <b>Т</b>олько <b>С</b>лабых <b>П</b>ривык <b>П</b>обеждать!" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>ермер <b>К</b>ормит <b>С</b>кот <b>Т</b>рижды, <b>С</b>ледуя <b>П</b>роверенному <b>П</b>лану" },
+      { dir: "снизу вверх (1→7)", phrase: "<b>Ф</b>утболист <b>К</b>аждый <b>С</b>езон <b>Т</b>ренируется, <b>С</b>тремясь <b>П</b>ревзойти <b>П</b>ротивника" }
+    ]
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  if (!Object.prototype.hasOwnProperty.call(data, lang)) return;
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.querySelector(`.lang-btn[data-lang="${lang}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+  render();
+}
+
+function render() {
+  const d = data[currentLang];
+  document.getElementById('title').textContent = d.title;
+  document.getElementById('subtitle').textContent = d.subtitle;
+  document.getElementById('mnemonic-title').textContent = d.mnemonicTitle;
+
+  const stack = document.getElementById('osi-stack');
+  stack.innerHTML = d.layers.map(l =>
+    '<div class="layer layer-' + l.num + '">' +
+      '<div class="layer-num">' + l.num + '</div>' +
+      '<div class="layer-emoji">' + l.emoji + '</div>' +
+      '<div class="layer-info">' +
+        '<div class="layer-name">' + l.name + '</div>' +
+        '<div class="layer-desc">' + l.desc + '</div>' +
+      '</div>' +
+      '<div class="layer-protocols">' + l.protocols + '</div>' +
+    '</div>'
+  ).join('');
+
+  const mn = document.getElementById('mnemonics');
+  mn.innerHTML = d.mnemonics.map(m =>
+    '<div class="mnemonic-card">' +
+      '<div class="direction">' + m.dir + '</div>' +
+      '<div class="phrase">' + m.phrase + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+render();
+</script>
+</body>
+</html>
