@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSA Algorithm Interactive</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue World', 'Helvetica Neue', 'Helvetica', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    position: relative;
+  }
+
+  header h1 {
+    font-family: 'Helvetica Now Display', 'Helvetica Neue World', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  header p.subtitle {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* Language switcher */
+  .lang-switcher {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    display: flex;
+    gap: 4px;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 3px;
+    border: 1px solid #334155;
+  }
+
+  .lang-btn {
+    background: transparent;
+    color: #94a3b8;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .lang-btn:hover { color: #f8fafc; }
+
+  .lang-btn.active {
+    background: #6366f1;
+    color: #fff;
+  }
+
+  /* Main grid */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px 30px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Cards */
+  .card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 20px 22px;
+    border-left: 4px solid;
+    transition: all 0.25s;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .bob-card { border-color: #06b6d4; }
+  .alice-card { border-color: #e11d48; }
+  .keygen-card { border-color: #f59e0b; }
+  .steps-card { border-color: #8b5cf6; }
+
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .card-header img,
+  .card-header .avatar-fallback {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 12px;
+    border: 2px solid #334155;
+    flex-shrink: 0;
+  }
+
+  .avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 700;
+    font-family: 'Century Schoolbook', 'Century', 'Palatino Linotype', Georgia, serif;
+  }
+
+  .avatar-fallback.bob-avatar {
+    background: linear-gradient(135deg, #164e63, #0e7490);
+    color: #67e8f9;
+    border-color: #06b6d4;
+    box-shadow: 0 0 16px rgba(6,182,212,0.25);
+  }
+
+  .avatar-fallback.alice-avatar {
+    background: linear-gradient(135deg, #4c0519, #881337);
+    color: #fda4af;
+    border-color: #e11d48;
+    box-shadow: 0 0 16px rgba(225,29,72,0.25);
+  }
+
+  .bob-card .card-header img { border-color: #06b6d4; box-shadow: 0 0 16px rgba(6,182,212,0.25); }
+  .alice-card .card-header img { border-color: #e11d48; box-shadow: 0 0 16px rgba(225,29,72,0.25); }
+
+  .card-header h3 {
+    font-family: 'Helvetica Now Display', 'Helvetica Neue World', 'Helvetica Neue', 'Helvetica', sans-serif;
+    font-size: 0.95rem;
+    color: #f8fafc;
+    line-height: 1.3;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  /* Input groups */
+  .field-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .field-group {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+  }
+
+  .input-wrap.has-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239,68,68,0.15);
+  }
+
+  .input-wrap.has-success {
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16,185,129,0.15);
+  }
+
+  .input-tag {
+    padding: 6px 10px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+    background: #1a2536;
+    border-right: 1px solid #334155;
+    min-width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .input-wrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 7px 10px;
+    color: #f8fafc;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    min-width: 0;
+  }
+
+  .input-wrap input::placeholder {
+    color: #475569;
+  }
+
+  .input-wrap input::-webkit-outer-spin-button,
+  .input-wrap input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .input-wrap input[type=number] { -moz-appearance: textfield; }
+
+  .validation-msg {
+    font-size: 0.7rem;
+    margin-top: 3px;
+    min-height: 16px;
+    font-weight: 500;
+  }
+
+  .validation-msg.error { color: #ef4444; }
+  .validation-msg.success { color: #10b981; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-encrypt {
+    background: linear-gradient(135deg, #0891b2, #06b6d4);
+    color: #fff;
+  }
+
+  .btn-encrypt:hover {
+    background: linear-gradient(135deg, #0e7490, #0891b2);
+    box-shadow: 0 0 16px rgba(6,182,212,0.35);
+  }
+
+  .btn-decrypt {
+    background: linear-gradient(135deg, #be123c, #e11d48);
+    color: #fff;
+  }
+
+  .btn-decrypt:hover {
+    background: linear-gradient(135deg, #9f1239, #be123c);
+    box-shadow: 0 0 16px rgba(225,29,72,0.35);
+  }
+
+  .btn-send {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    color: #fff;
+    font-size: 0.78rem;
+    padding: 6px 14px;
+  }
+
+  .btn-send:hover {
+    background: linear-gradient(135deg, #b45309, #d97706);
+    box-shadow: 0 0 16px rgba(245,158,11,0.35);
+  }
+
+  .btn-random {
+    background: #334155;
+    color: #e2e8f0;
+    font-size: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid #475569;
+  }
+
+  .btn-random:hover {
+    background: #475569;
+    border-color: #6366f1;
+  }
+
+  .btn-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Key display */
+  .key-display {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    background: #0f172a;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  .key-display .key-label {
+    color: #94a3b8;
+  }
+
+  .key-display .key-val {
+    color: #f59e0b;
+    font-weight: 700;
+  }
+
+  /* Steps list */
+  .steps-list {
+    counter-reset: step-counter;
+    list-style: none;
+    padding: 0;
+  }
+
+  .steps-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 8px 0 8px 36px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+    border-bottom: 1px solid #1a2536;
+  }
+
+  .steps-list li:last-child { border-bottom: none; }
+
+  .steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 24px;
+    height: 24px;
+    background: #312e81;
+    color: #a5b4fc;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .steps-list li code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #0f172a;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    color: #f59e0b;
+  }
+
+  /* Arrow animation */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .arrow-symbol {
+    display: inline-block;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Result highlight */
+  @keyframes result-flash {
+    0% { box-shadow: 0 0 0 2px rgba(16,185,129,0.5); }
+    100% { box-shadow: 0 0 0 2px transparent; }
+  }
+
+  .input-wrap.result-flash {
+    animation: result-flash 0.8s ease-out;
+  }
+
+  /* Keygen card heading */
+  .keygen-title {
+    font-size: 0.95rem;
+    color: #f8fafc;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .keygen-title .badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #f59e0b;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* Steps card heading */
+  .steps-title {
+    font-size: 0.95rem;
+    color: #f8fafc;
+    margin-bottom: 14px;
+  }
+
+  /* Totient info */
+  .totient-info {
+    font-family: 'Consolas', monospace;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #475569;
+    font-size: 0.72rem;
+  }
+
+  footer a {
+    color: #6366f1;
+    text-decoration: none;
+  }
+
+  footer a:hover { text-decoration: underline; }
+
+  /* Step highlight */
+  .steps-list li.step-active {
+    background: rgba(99, 102, 241, 0.12);
+    border-left: 3px solid #6366f1;
+    padding-left: 33px;
+    border-bottom-color: rgba(99, 102, 241, 0.2);
+    color: #f8fafc;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .steps-list li.step-active::before {
+    background: #6366f1;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+  }
+
+  .steps-list li.step-active code {
+    background: #312e81;
+    color: #fbbf24;
+  }
+
+  /* Fireworks canvas */
+  #fireworks-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+    header { padding: 20px 14px 8px; }
+    header h1 { font-size: 1.4rem; }
+    .lang-switcher { position: static; margin: 10px auto 0; justify-content: center; }
+  }
+
+  @media (max-width: 500px) {
+    .field-row { flex-direction: column; }
+    .card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="ro">RO</button>
+    <button class="lang-btn" data-lang="ru">RU</button>
+  </div>
+  <h1 data-i18n="title"></h1>
+  <p class="subtitle" data-i18n="subtitle"></p>
+</header>
+
+<div class="main-layout">
+
+  <!-- Bob: Encryption -->
+  <section class="card bob-card">
+    <div class="card-header">
+      <img src="bob.jpg" alt="Bob" id="img-bob">
+      <h3 data-i18n="bob_header"></h3>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label data-i18n="message_m_label"></label>
+        <div class="input-wrap" id="wrap-m">
+          <span class="input-tag">m</span>
+          <input id="m" type="number" placeholder="42">
+        </div>
+        <div class="validation-msg" id="msg-m"></div>
+      </div>
+    </div>
+    <div class="section-label" data-i18n="public_key"></div>
+    <div class="field-row">
+      <div class="field-group">
+        <label>n</label>
+        <div class="input-wrap" id="wrap-enc-n">
+          <span class="input-tag">n</span>
+          <input id="encrypt_n" type="number">
+        </div>
+        <div class="validation-msg" id="msg-enc-n"></div>
+      </div>
+      <div class="field-group">
+        <label>e</label>
+        <div class="input-wrap" id="wrap-enc-e">
+          <span class="input-tag">e</span>
+          <input id="encrypt_e" type="number">
+        </div>
+        <div class="validation-msg" id="msg-enc-e"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-encrypt" id="encode" data-i18n="encrypt_btn">
+      </button>
+    </div>
+  </section>
+
+  <!-- Alice: Decryption -->
+  <section class="card alice-card">
+    <div class="card-header">
+      <img src="alice.jpg" alt="Alice" id="img-alice">
+      <h3 data-i18n="alice_header"></h3>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label data-i18n="ciphertext_c_label"></label>
+        <div class="input-wrap" id="wrap-c">
+          <span class="input-tag">c</span>
+          <input id="c" type="number">
+        </div>
+        <div class="validation-msg" id="msg-c"></div>
+      </div>
+    </div>
+    <div class="section-label" data-i18n="private_key"></div>
+    <div class="field-row">
+      <div class="field-group">
+        <label>n</label>
+        <div class="input-wrap" id="wrap-dec-n">
+          <span class="input-tag">n</span>
+          <input id="decrypt_n" type="number">
+        </div>
+        <div class="validation-msg" id="msg-dec-n"></div>
+      </div>
+      <div class="field-group">
+        <label>d</label>
+        <div class="input-wrap" id="wrap-dec-d">
+          <span class="input-tag">d</span>
+          <input id="decrypt_d" type="number">
+        </div>
+        <div class="validation-msg" id="msg-dec-d"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-decrypt" id="decode" data-i18n="decrypt_btn">
+      </button>
+    </div>
+    <div class="field-row" style="margin-top:12px;">
+      <div class="field-group">
+        <label data-i18n="decrypted_m_label"></label>
+        <div class="input-wrap" id="wrap-dec-m">
+          <span class="input-tag">m</span>
+          <input id="decrypted_m" type="number" readonly>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Generation -->
+  <section class="card keygen-card">
+    <div class="keygen-title">
+      <span data-i18n="keygen_title"></span>
+      <span class="badge" data-i18n="keygen_badge"></span>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label data-i18n="prime_p"></label>
+        <div class="input-wrap" id="wrap-p">
+          <span class="input-tag">p</span>
+          <input id="p" type="number" placeholder="23">
+        </div>
+        <div class="validation-msg" id="msg-p"></div>
+      </div>
+      <div class="field-group">
+        <label data-i18n="prime_q"></label>
+        <div class="input-wrap" id="wrap-q">
+          <span class="input-tag">q</span>
+          <input id="q" type="number" placeholder="17">
+        </div>
+        <div class="validation-msg" id="msg-q"></div>
+      </div>
+      <div class="field-group">
+        <label data-i18n="modulus_n"></label>
+        <div class="input-wrap">
+          <span class="input-tag">n</span>
+          <input id="n" type="number" readonly>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label data-i18n="totient_t"></label>
+        <div class="input-wrap">
+          <span class="input-tag">t</span>
+          <input id="t" type="number" readonly>
+        </div>
+        <div class="totient-info" id="totient-info"></div>
+      </div>
+      <div class="field-group">
+        <label data-i18n="pub_exp_e"></label>
+        <div class="input-wrap" id="wrap-e">
+          <span class="input-tag">e</span>
+          <input id="e" type="number" placeholder="">
+        </div>
+        <div class="validation-msg" id="msg-e"></div>
+      </div>
+      <div class="field-group">
+        <label data-i18n="priv_exp_d"></label>
+        <div class="input-wrap">
+          <span class="input-tag">d</span>
+          <input id="d" type="number" readonly>
+        </div>
+      </div>
+    </div>
+    <div class="key-display">
+      <div><span class="key-label" data-i18n="private_key_label"></span> <span class="key-val" id="alice_pvt">n=?, d=?</span></div>
+      <div><span class="key-label" data-i18n="public_key_label"></span> <span class="key-val" id="alice_pub">n=?, e=?</span></div>
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-send" id="send-key" data-i18n="send_key_btn"></button>
+      <button class="btn btn-random" id="random-primes" data-i18n="random_btn"></button>
+    </div>
+  </section>
+
+  <!-- Steps -->
+  <section class="card steps-card">
+    <div class="steps-title" data-i18n="steps_title"></div>
+    <ol class="steps-list" id="steps-list"></ol>
+  </section>
+
+</div>
+
+<footer><span id="footerText"></span> &mdash; &copy; 2026 Maxim Masiutin</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== RSA Math ====================
+
+  function gcd(a, b) {
+    while (b !== 0) { let t = b; b = a % b; a = t; }
+    return a;
+  }
+
+  function lcm(a, b) {
+    return (a / gcd(a, b)) * b;
+  }
+
+  function eulerTotient(p, q) { return (p - 1) * (q - 1); }
+  function carmichaelTotient(p, q) { return lcm(p - 1, q - 1); }
+
+  function egcd(a, b) {
+    if (a === 0) return [b, 0, 1];
+    let r = egcd(b % a, a);
+    return [r[0], r[2] - Math.floor(b / a) * r[1], r[1]];
+  }
+
+  function modInv(a, m) {
+    let r = egcd(a, m);
+    if (r[0] !== 1) return null;
+    let inv = r[1];
+    if (inv < 0) inv += m;
+    return inv;
+  }
+
+  function powMod(base, exp, mod) {
+    let s = 1, c = base % mod;
+    let k = exp;
+    while (k > 0) {
+      if (k % 2 === 1) { s = (s * c) % mod; }
+      k = Math.floor(k / 2);
+      c = (c * c) % mod;
+    }
+    return s;
+  }
+
+  function isPrime(n) {
+    if (isNaN(n) || !isFinite(n) || n % 1 || n < 2) return false;
+    if (n === 2) return true;
+    if (n % 2 === 0) return false;
+    let m = Math.sqrt(n);
+    for (let i = 3; i <= m; i += 2) {
+      if (n % i === 0) return false;
+    }
+    return true;
+  }
+
+  function isCoprime(a, b) { return gcd(a, b) === 1; }
+
+  const SMALL_PRIMES = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
+    59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
+    127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181,
+    191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251
+  ];
+
+  // ==================== i18n ====================
+
+  let lang = 'en';
+
+  const T = {
+    en: {
+      title: "RSA Algorithm Interactive",
+      subtitle: "Information Security Technologies: The RSA Algorithm",
+      bob_header: "Bob encrypts with Alice's public key",
+      alice_header: "Alice decrypts with her private key",
+      message_m_label: "Message",
+      ciphertext_c_label: "Ciphertext",
+      public_key: "PUBLIC KEY",
+      private_key: "PRIVATE KEY",
+      encrypt_btn: "Encrypt \u279C",
+      decrypt_btn: "\u2193 Decrypt",
+      decrypted_m_label: "Decrypted message",
+      keygen_title: "Alice's Key Generation",
+      keygen_badge: "KEYS",
+      prime_p: "Prime \"p\"",
+      prime_q: "Prime \"q\"",
+      modulus_n: "Modulus \"n\"",
+      totient_t: "Totient \"t\"",
+      pub_exp_e: "Public exponent \"e\"",
+      priv_exp_d: "Private exponent \"d\"",
+      private_key_label: "Private key:",
+      public_key_label: "Public key:",
+      send_key_btn: "Send public key to Bob \u2191",
+      random_btn: "Random primes",
+      steps_title: "Steps to complete the lab work:",
+      not_valid_num: "Not a valid number.",
+      is_negative: "Number is negative.",
+      not_prime: "Not prime.",
+      valid_prime: "Valid prime.",
+      not_valid_e: "Not a valid public exponent.",
+      e_negative: "Public exponent is negative.",
+      valid_e: "Valid public exponent.",
+      totient_missing: "Totient \"t\" not set.",
+      enter_value: "Enter a value.",
+      m_too_large: "Message must be less than n.",
+      c_too_large: "Ciphertext must be less than n.",
+      footer: "RSA Algorithm Interactive",
+      steps: [
+        "Enter two prime numbers \"p\" and \"q\".",
+        "Calculate the modulus (<code>n = p &times; q</code>).",
+        "Calculate \"t\" as Carmichael's totient, the least common multiple of (p-1) and (q-1) (<code>&lambda;(n) = lcm(p-1, q-1)</code>), or Euler's totient (<code>&phi;(n) = (p-1)(q-1)</code>).",
+        "Choose a public exponent \"e\" (a number from 2 to \"t\", coprime with \"t\").",
+        "Calculate the private exponent \"d\", the modular multiplicative inverse of \"e\" modulo \"t\" (<code>d &times; e &equiv; 1 (mod t)</code>).",
+        "Alice sends her public key (\"n\" and \"e\") to Bob.",
+        "Bob encrypts message \"m\" using \"n\" and \"e\", sends ciphertext \"c\" to Alice (<code>c = m<sup>e</sup> mod n</code>).",
+        "Alice decrypts ciphertext \"c\" and obtains plaintext \"m\" (<code>m = c<sup>d</sup> mod n</code>)."
+      ]
+    },
+    ro: {
+      title: "Algoritmul RSA Interactiv",
+      subtitle: "Tehnologii ale securit\u0103\u021Bii informa\u021Bionale: Algoritmul RSA",
+      bob_header: "Bob cripteaz\u0103 cu cheia public\u0103 a lui Alice",
+      alice_header: "Alice decripteaz\u0103 cu cheia sa privat\u0103",
+      message_m_label: "Mesaj",
+      ciphertext_c_label: "Text cifrat",
+      public_key: "CHEIE PUBLIC\u0102",
+      private_key: "CHEIE PRIVAT\u0102",
+      encrypt_btn: "Cripteaz\u0103 \u279C",
+      decrypt_btn: "\u2193 Decripteaz\u0103",
+      decrypted_m_label: "Mesaj decriptat",
+      keygen_title: "Generarea cheilor Alice",
+      keygen_badge: "CHEI",
+      prime_p: "Num\u0103r prim \"p\"",
+      prime_q: "Num\u0103r prim \"q\"",
+      modulus_n: "Modulo \"n\"",
+      totient_t: "Totient \"t\"",
+      pub_exp_e: "Exponent\u0103 public\u0103 \"e\"",
+      priv_exp_d: "Exponent\u0103 privat\u0103 \"d\"",
+      private_key_label: "Cheie privat\u0103:",
+      public_key_label: "Cheie public\u0103:",
+      send_key_btn: "Trimite cheia public\u0103 lui Bob \u2191",
+      random_btn: "Numere prime aleatorii",
+      steps_title: "Pa\u0219i pentru \u00eendeplinirea lucr\u0103rii:",
+      not_valid_num: "Nu este num\u0103r valid.",
+      is_negative: "Num\u0103rul este negativ.",
+      not_prime: "Nu este prim.",
+      valid_prime: "Num\u0103r prim valid.",
+      not_valid_e: "Nu este exponent\u0103 public\u0103 valid\u0103.",
+      e_negative: "Exponenta public\u0103 este negativ\u0103.",
+      valid_e: "Exponent\u0103 public\u0103 valid\u0103.",
+      totient_missing: "Totient \"t\" nu este specificat.",
+      enter_value: "Introduce\u021Bi o valoare.",
+      m_too_large: "Mesajul trebuie s\u0103 fie mai mic dec\u00e2t n.",
+      c_too_large: "Textul cifrat trebuie s\u0103 fie mai mic dec\u00e2t n.",
+      footer: "Algoritmul RSA Interactiv",
+      steps: [
+        "Introduce\u021Bi dou\u0103 numere prime \"p\" \u0219i \"q\".",
+        "Calcula\u021Bi modulo (<code>n = p &times; q</code>).",
+        "Calcula\u021Bi \"t\" fiind func\u021Bia totient a lui Carmichael, cel mai mic multiplu comun al (p-1) \u0219i (q-1) (<code>&lambda;(n) = lcm(p-1, q-1)</code>), sau func\u021Bia totient a lui Euler (<code>&phi;(n) = (p-1)(q-1)</code>).",
+        "Determina\u021Bi o exponent\u0103 public\u0103 \"e\" (un num\u0103r de la 2 p\u00e2n\u0103 la \"t\", coprim cu \"t\").",
+        "Determina\u021Bi o exponent\u0103 privat\u0103 \"d\", fiind inversul multiplicativ modular al \"e\" modulo \"t\" (<code>d &times; e &equiv; 1 (mod t)</code>).",
+        "Alice expediaz\u0103 cheia public\u0103 sa (\"n\" \u0219i \"e\") lui Bob.",
+        "Bob cripteaz\u0103 mesajul \"m\", folosind valorile \"n\" \u0219i \"e\", \u0219i expediaz\u0103 textul cifrat \"c\" lui Alice (<code>c = m<sup>e</sup> mod n</code>).",
+        "Alice decripteaz\u0103 textul cifrat \"c\" \u0219i ob\u021Bine textul clar al mesajului \"m\" (<code>m = c<sup>d</sup> mod n</code>)."
+      ]
+    },
+    ru: {
+      title: "\u0418\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0439 \u0430\u043b\u0433\u043e\u0440\u0438\u0442\u043c RSA",
+      subtitle: "\u0422\u0435\u0445\u043d\u043e\u043b\u043e\u0433\u0438\u0438 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u043e\u043d\u043d\u043e\u0439 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u0438: \u0410\u043b\u0433\u043e\u0440\u0438\u0442\u043c RSA",
+      bob_header: "\u0411\u043e\u0431 \u0448\u0438\u0444\u0440\u0443\u0435\u0442 \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u043c \u043a\u043b\u044e\u0447\u043e\u043c \u0410\u043b\u0438\u0441\u044b",
+      alice_header: "\u0410\u043b\u0438\u0441\u0430 \u0440\u0430\u0441\u0448\u0438\u0444\u0440\u043e\u0432\u044b\u0432\u0430\u0435\u0442 \u0441\u0432\u043e\u0438\u043c \u0437\u0430\u043a\u0440\u044b\u0442\u044b\u043c \u043a\u043b\u044e\u0447\u043e\u043c",
+      message_m_label: "\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435",
+      ciphertext_c_label: "\u0428\u0438\u0444\u0440\u043e\u0442\u0435\u043a\u0441\u0442",
+      public_key: "\u041e\u0422\u041a\u0420\u042b\u0422\u042b\u0419 \u041a\u041b\u042e\u0427",
+      private_key: "\u0417\u0410\u041a\u0420\u042b\u0422\u042b\u0419 \u041a\u041b\u042e\u0427",
+      encrypt_btn: "\u0417\u0430\u0448\u0438\u0444\u0440\u043e\u0432\u0430\u0442\u044c \u279C",
+      decrypt_btn: "\u2193 \u0420\u0430\u0441\u0448\u0438\u0444\u0440\u043e\u0432\u0430\u0442\u044c",
+      decrypted_m_label: "\u0420\u0430\u0441\u0448\u0438\u0444\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435",
+      keygen_title: "\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043a\u043b\u044e\u0447\u0435\u0439 \u0410\u043b\u0438\u0441\u044b",
+      keygen_badge: "\u041a\u041b\u042e\u0427\u0418",
+      prime_p: "\u041f\u0440\u043e\u0441\u0442\u043e\u0435 \u0447\u0438\u0441\u043b\u043e \"p\"",
+      prime_q: "\u041f\u0440\u043e\u0441\u0442\u043e\u0435 \u0447\u0438\u0441\u043b\u043e \"q\"",
+      modulus_n: "\u041c\u043e\u0434\u0443\u043b\u044c \"n\"",
+      totient_t: "\u0424\u0443\u043d\u043a\u0446\u0438\u044f \u042d\u0439\u043b\u0435\u0440\u0430 \"t\"",
+      pub_exp_e: "\u041e\u0442\u043a\u0440\u044b\u0442\u0430\u044f \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0430 \"e\"",
+      priv_exp_d: "\u0417\u0430\u043a\u0440\u044b\u0442\u0430\u044f \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0430 \"d\"",
+      private_key_label: "\u0417\u0430\u043a\u0440\u044b\u0442\u044b\u0439 \u043a\u043b\u044e\u0447:",
+      public_key_label: "\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0439 \u043a\u043b\u044e\u0447:",
+      send_key_btn: "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043a\u043b\u044e\u0447 \u0411\u043e\u0431\u0443 \u2191",
+      random_btn: "\u0421\u043b\u0443\u0447\u0430\u0439\u043d\u044b\u0435 \u043f\u0440\u043e\u0441\u0442\u044b\u0435",
+      steps_title: "\u0428\u0430\u0433\u0438 \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u044f \u043b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u043e\u0439 \u0440\u0430\u0431\u043e\u0442\u044b:",
+      not_valid_num: "\u041d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0447\u0438\u0441\u043b\u043e\u043c.",
+      is_negative: "\u0427\u0438\u0441\u043b\u043e \u043e\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435.",
+      not_prime: "\u041d\u0435 \u043f\u0440\u043e\u0441\u0442\u043e\u0435.",
+      valid_prime: "\u041f\u0440\u043e\u0441\u0442\u043e\u0435 \u0447\u0438\u0441\u043b\u043e.",
+      not_valid_e: "\u041d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u043e\u0439 \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u043e\u0439.",
+      e_negative: "\u042d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0430 \u043e\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043b\u044c\u043d\u0430\u044f.",
+      valid_e: "\u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0430\u044f \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0430.",
+      totient_missing: "\u0424\u0443\u043d\u043a\u0446\u0438\u044f \"t\" \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u0430.",
+      enter_value: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435.",
+      m_too_large: "\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \u0434\u043e\u043b\u0436\u043d\u043e \u0431\u044b\u0442\u044c \u043c\u0435\u043d\u044c\u0448\u0435 n.",
+      c_too_large: "\u0428\u0438\u0444\u0440\u043e\u0442\u0435\u043a\u0441\u0442 \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043c\u0435\u043d\u044c\u0448\u0435 n.",
+      footer: "\u0418\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0439 \u0430\u043b\u0433\u043e\u0440\u0438\u0442\u043c RSA",
+      steps: [
+        "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0432\u0430 \u043f\u0440\u043e\u0441\u0442\u044b\u0445 \u0447\u0438\u0441\u043b\u0430 \"p\" \u0438 \"q\".",
+        "\u0412\u044b\u0447\u0438\u0441\u043b\u0438\u0442\u0435 \u043c\u043e\u0434\u0443\u043b\u044c (<code>n = p &times; q</code>).",
+        "\u0412\u044b\u0447\u0438\u0441\u043b\u0438\u0442\u0435 \"t\" \u043a\u0430\u043a \u0444\u0443\u043d\u043a\u0446\u0438\u044e \u041a\u0430\u0440\u043c\u0430\u0439\u043a\u043b\u0430, \u043d\u0430\u0438\u043c\u0435\u043d\u044c\u0448\u0435\u0435 \u043e\u0431\u0449\u0435\u0435 \u043a\u0440\u0430\u0442\u043d\u043e\u0435 (p-1) \u0438 (q-1) (<code>&lambda;(n) = lcm(p-1, q-1)</code>), \u0438\u043b\u0438 \u0444\u0443\u043d\u043a\u0446\u0438\u044e \u042d\u0439\u043b\u0435\u0440\u0430 (<code>&phi;(n) = (p-1)(q-1)</code>).",
+        "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043e\u0442\u043a\u0440\u044b\u0442\u0443\u044e \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0443 \"e\" (\u0447\u0438\u0441\u043b\u043e \u043e\u0442 2 \u0434\u043e \"t\", \u0432\u0437\u0430\u0438\u043c\u043d\u043e \u043f\u0440\u043e\u0441\u0442\u043e\u0435 \u0441 \"t\").",
+        "\u0412\u044b\u0447\u0438\u0441\u043b\u0438\u0442\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0443\u044e \u044d\u043a\u0441\u043f\u043e\u043d\u0435\u043d\u0442\u0443 \"d\" \u2014 \u043c\u043e\u0434\u0443\u043b\u044f\u0440\u043d\u044b\u0439 \u043c\u0443\u043b\u044c\u0442\u0438\u043f\u043b\u0438\u043a\u0430\u0442\u0438\u0432\u043d\u044b\u0439 \u043e\u0431\u0440\u0430\u0442\u043d\u044b\u0439 \"e\" \u043f\u043e \u043c\u043e\u0434\u0443\u043b\u044e \"t\" (<code>d &times; e &equiv; 1 (mod t)</code>).",
+        "\u0410\u043b\u0438\u0441\u0430 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u044f\u0435\u0442 \u0441\u0432\u043e\u0439 \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0439 \u043a\u043b\u044e\u0447 (\"n\" \u0438 \"e\") \u0411\u043e\u0431\u0443.",
+        "\u0411\u043e\u0431 \u0448\u0438\u0444\u0440\u0443\u0435\u0442 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \"m\" \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044f \"n\" \u0438 \"e\", \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u044f\u0435\u0442 \u0448\u0438\u0444\u0440\u043e\u0442\u0435\u043a\u0441\u0442 \"c\" \u0410\u043b\u0438\u0441\u0435 (<code>c = m<sup>e</sup> mod n</code>).",
+        "\u0410\u043b\u0438\u0441\u0430 \u0440\u0430\u0441\u0448\u0438\u0444\u0440\u043e\u0432\u044b\u0432\u0430\u0435\u0442 \u0448\u0438\u0444\u0440\u043e\u0442\u0435\u043a\u0441\u0442 \"c\" \u0438 \u043f\u043e\u043b\u0443\u0447\u0430\u0435\u0442 \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \"m\" (<code>m = c<sup>d</sup> mod n</code>)."
+      ]
+    }
+  };
+
+  // ==================== i18n Engine ====================
+
+  function t(key) { return T[lang][key] || T['en'][key] || key; }
+
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      el.textContent = t(key);
+    });
+    // steps
+    var list = document.getElementById('steps-list');
+    list.innerHTML = '';
+    var steps = T[lang].steps || T['en'].steps;
+    steps.forEach(function(s) {
+      var li = document.createElement('li');
+      li.innerHTML = s;
+      list.appendChild(li);
+    });
+    document.getElementById('footerText').textContent = t('footer');
+    document.documentElement.lang = lang;
+  }
+
+  function setLang(l) {
+    lang = l;
+    document.querySelectorAll('.lang-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.lang === l);
+    });
+    applyLang();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { setLang(btn.dataset.lang); });
+  });
+
+  // ==================== DOM Helpers ====================
+
+  function $(id) { return document.getElementById(id); }
+
+  function intVal(id) {
+    let v = parseInt($(id).value, 10);
+    return isNaN(v) ? NaN : v;
+  }
+
+  function setValidation(wrapId, msgId, state, msg) {
+    var wrap = $(wrapId);
+    if (!wrap) return;
+    wrap.classList.remove('has-error', 'has-success');
+    if (state === 'error') wrap.classList.add('has-error');
+    else if (state === 'success') wrap.classList.add('has-success');
+    var msgEl = $(msgId);
+    if (msgEl) {
+      msgEl.className = 'validation-msg ' + (state || '');
+      msgEl.textContent = msg || '';
+    }
+  }
+
+  function flashResult(wrapId) {
+    var wrap = $(wrapId);
+    if (!wrap) return;
+    wrap.classList.remove('result-flash');
+    void wrap.offsetWidth; // reflow
+    wrap.classList.add('result-flash');
+  }
+
+  // ==================== Key Generation Logic ====================
+
+  function validatePrime(inputId, wrapId, msgId) {
+    var v = intVal(inputId);
+    if (isNaN(v)) { setValidation(wrapId, msgId, 'error', t('not_valid_num')); return false; }
+    if (v < 0) { setValidation(wrapId, msgId, 'error', t('is_negative')); return false; }
+    if (!isPrime(v)) { setValidation(wrapId, msgId, 'error', t('not_prime')); return false; }
+    setValidation(wrapId, msgId, 'success', t('valid_prime'));
+    return true;
+  }
+
+  function updateN() {
+    var pOk = validatePrime('p', 'wrap-p', 'msg-p');
+    var qOk = validatePrime('q', 'wrap-q', 'msg-q');
+    if (pOk && qOk) {
+      var p = intVal('p'), q = intVal('q');
+      var n = p * q;
+      var lam = carmichaelTotient(p, q);
+      var phi = eulerTotient(p, q);
+      $('n').value = n;
+      $('t').value = lam;
+      $('totient-info').innerHTML = '&lambda;(n)=' + lam + ', &phi;(n)=' + phi;
+    } else {
+      $('n').value = '';
+      $('t').value = '';
+      $('totient-info').textContent = '';
+    }
+    validateE();
+  }
+
+  function validateE() {
+    var eVal = intVal('e');
+    var tVal = intVal('t');
+    if (isNaN(eVal)) {
+      setValidation('wrap-e', 'msg-e', '', '');
+      $('d').value = '';
+      updateKeyDisplay();
+      return;
+    }
+    if (eVal < 0) {
+      setValidation('wrap-e', 'msg-e', 'error', t('e_negative'));
+      $('d').value = '';
+      updateKeyDisplay();
+      return;
+    }
+    if (isNaN(tVal) || tVal < 2) {
+      setValidation('wrap-e', 'msg-e', 'error', t('totient_missing'));
+      $('d').value = '';
+      updateKeyDisplay();
+      return;
+    }
+    if (eVal < 2 || eVal >= tVal || !isCoprime(eVal, tVal)) {
+      setValidation('wrap-e', 'msg-e', 'error', t('not_valid_e'));
+      $('d').value = '';
+      updateKeyDisplay();
+      return;
+    }
+    setValidation('wrap-e', 'msg-e', 'success', t('valid_e'));
+    var d = modInv(eVal, tVal);
+    $('d').value = d;
+    updateKeyDisplay();
+  }
+
+  function updateKeyDisplay() {
+    var n = $('n').value || '?';
+    var e = $('e').value || '?';
+    var d = $('d').value || '?';
+    $('alice_pvt').textContent = 'n=' + n + ', d=' + d;
+    $('alice_pub').textContent = 'n=' + n + ', e=' + e;
+  }
+
+  // ==================== Event Binding ====================
+
+  $('p').addEventListener('input', updateN);
+  $('q').addEventListener('input', updateN);
+  $('e').addEventListener('input', validateE);
+
+  // Encrypt
+  $('encode').addEventListener('click', function(ev) {
+    ev.preventDefault();
+    var n = intVal('encrypt_n');
+    var e = intVal('encrypt_e');
+    var m = intVal('m');
+    var ok = true;
+    if (isNaN(n) || n < 2) { setValidation('wrap-enc-n', 'msg-enc-n', 'error', t('enter_value')); ok = false; }
+    else { setValidation('wrap-enc-n', 'msg-enc-n', '', ''); }
+    if (isNaN(e) || e < 2) { setValidation('wrap-enc-e', 'msg-enc-e', 'error', t('enter_value')); ok = false; }
+    else { setValidation('wrap-enc-e', 'msg-enc-e', '', ''); }
+    if (isNaN(m) || m < 0) { setValidation('wrap-m', 'msg-m', 'error', t('enter_value')); ok = false; }
+    else if (m >= n) { setValidation('wrap-m', 'msg-m', 'error', t('m_too_large')); ok = false; }
+    else { setValidation('wrap-m', 'msg-m', '', ''); }
+    if (!ok) return;
+    var c = powMod(m, e, n);
+    $('c').value = c;
+    flashResult('wrap-c');
+  });
+
+  // Decrypt
+  $('decode').addEventListener('click', function(ev) {
+    ev.preventDefault();
+    var n = intVal('decrypt_n');
+    var d = intVal('decrypt_d');
+    var c = intVal('c');
+    var ok = true;
+    if (isNaN(n) || n < 2) { setValidation('wrap-dec-n', 'msg-dec-n', 'error', t('enter_value')); ok = false; }
+    else { setValidation('wrap-dec-n', 'msg-dec-n', '', ''); }
+    if (isNaN(d) || d < 2) { setValidation('wrap-dec-d', 'msg-dec-d', 'error', t('enter_value')); ok = false; }
+    else { setValidation('wrap-dec-d', 'msg-dec-d', '', ''); }
+    if (isNaN(c) || c < 0) { setValidation('wrap-c', 'msg-c', 'error', t('enter_value')); ok = false; }
+    else if (c >= n) { setValidation('wrap-c', 'msg-c', 'error', t('c_too_large')); ok = false; }
+    else { setValidation('wrap-c', 'msg-c', '', ''); }
+    if (!ok) return;
+    var m = powMod(c, d, n);
+    $('decrypted_m').value = m;
+    flashResult('wrap-dec-m');
+    // Fireworks if decrypted message matches original
+    var origM = intVal('m');
+    if (!isNaN(origM) && m === origM) {
+      launchFireworks();
+    }
+  });
+
+  // Send public key to Bob
+  $('send-key').addEventListener('click', function(ev) {
+    ev.preventDefault();
+    var n = $('n').value;
+    var e = $('e').value;
+    if (n && e) {
+      $('encrypt_n').value = n;
+      $('encrypt_e').value = e;
+      $('decrypt_n').value = n;
+      var d = $('d').value;
+      if (d) $('decrypt_d').value = d;
+      flashResult('wrap-enc-n');
+      flashResult('wrap-enc-e');
+    }
+  });
+
+  // Random primes
+  $('random-primes').addEventListener('click', function(ev) {
+    ev.preventDefault();
+    // Skip index 0 (prime 2) to avoid edge case where t < 3
+    let idx1 = 1 + Math.floor(Math.random() * (SMALL_PRIMES.length - 1));
+    let idx2 = 1 + Math.floor(Math.random() * (SMALL_PRIMES.length - 1));
+    while (idx2 === idx1) { idx2 = 1 + Math.floor(Math.random() * (SMALL_PRIMES.length - 1)); }
+    $('p').value = SMALL_PRIMES[idx1];
+    $('q').value = SMALL_PRIMES[idx2];
+    updateN();
+    // Auto-choose e
+    var tVal = intVal('t');
+    if (!isNaN(tVal) && tVal >= 3) {
+      for (var i = 0; i < 1000; i++) {
+        var candidate = Math.floor(Math.random() * (tVal - 2)) + 2;
+        if (isCoprime(candidate, tVal)) {
+          $('e').value = candidate;
+          validateE();
+          break;
+        }
+      }
+    }
+  });
+
+  // ==================== Fireworks ====================
+
+  function launchFireworks() {
+    var canvas = document.createElement('canvas');
+    canvas.id = 'fireworks-canvas';
+    document.body.appendChild(canvas);
+    var ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var particles = [];
+    var rockets = [];
+    var hue = 0;
+    var startTime = Date.now();
+    var duration = 3500;
+
+    function Particle(x, y, hue) {
+      this.x = x;
+      this.y = y;
+      this.hue = hue;
+      var angle = Math.random() * Math.PI * 2;
+      var speed = Math.random() * 5 + 2;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.alpha = 1;
+      this.decay = Math.random() * 0.02 + 0.015;
+      this.size = Math.random() * 3 + 1;
+    }
+
+    function Rocket(x) {
+      this.x = x;
+      this.y = canvas.height;
+      this.targetY = canvas.height * (0.15 + Math.random() * 0.35);
+      this.speed = 4 + Math.random() * 3;
+      this.hue = Math.random() * 360;
+      this.trail = [];
+      this.exploded = false;
+    }
+
+    function spawnRocket() {
+      rockets.push(new Rocket(Math.random() * canvas.width));
+    }
+
+    var rocketInterval = setInterval(function() {
+      if (Date.now() - startTime < duration - 800) {
+        spawnRocket();
+        if (Math.random() > 0.5) spawnRocket();
+      }
+    }, 300);
+    spawnRocket();
+    spawnRocket();
+
+    function update() {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = 'lighter';
+
+      for (var r = rockets.length - 1; r >= 0; r--) {
+        var rk = rockets[r];
+        rk.trail.push({ x: rk.x, y: rk.y });
+        if (rk.trail.length > 8) rk.trail.shift();
+        rk.y -= rk.speed;
+
+        // Draw rocket trail
+        for (var tr = 0; tr < rk.trail.length; tr++) {
+          var ta = tr / rk.trail.length * 0.5;
+          ctx.beginPath();
+          ctx.arc(rk.trail[tr].x, rk.trail[tr].y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'hsla(' + rk.hue + ',100%,70%,' + ta + ')';
+          ctx.fill();
+        }
+
+        if (rk.y <= rk.targetY) {
+          // Explode
+          var count = 60 + Math.floor(Math.random() * 40);
+          for (var i = 0; i < count; i++) {
+            particles.push(new Particle(rk.x, rk.y, rk.hue + Math.random() * 40 - 20));
+          }
+          rockets.splice(r, 1);
+        }
+      }
+
+      for (var p = particles.length - 1; p >= 0; p--) {
+        var pt = particles[p];
+        pt.vx *= 0.98;
+        pt.vy *= 0.98;
+        pt.vy += 0.04;
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.alpha -= pt.decay;
+
+        if (pt.alpha <= 0) {
+          particles.splice(p, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'hsla(' + pt.hue + ',100%,65%,' + pt.alpha + ')';
+        ctx.fill();
+      }
+
+      if (Date.now() - startTime < duration || particles.length > 0 || rockets.length > 0) {
+        requestAnimationFrame(update);
+      } else {
+        clearInterval(rocketInterval);
+        canvas.parentNode.removeChild(canvas);
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  // ==================== Step Highlight ====================
+
+  function highlightStep(index) {
+    var items = document.querySelectorAll('#steps-list li');
+    items.forEach(function(li, i) {
+      li.classList.toggle('step-active', i === index);
+    });
+    // scroll the highlighted step into view if needed
+    if (index >= 0 && index < items.length) {
+      items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function clearStepHighlight() {
+    document.querySelectorAll('#steps-list li').forEach(function(li) {
+      li.classList.remove('step-active');
+    });
+  }
+
+  // Map input/button IDs to step indices (0-based)
+  var stepMap = {
+    'p': 0, 'q': 0,
+    'n': 1,
+    't': 2,
+    'e': 3,
+    'd': 4,
+    'send-key': 5, 'encrypt_n': 5, 'encrypt_e': 5,
+    'm': 6, 'encode': 6,
+    'c': 7, 'decrypt_n': 7, 'decrypt_d': 7, 'decode': 7, 'decrypted_m': 7
+  };
+
+  Object.keys(stepMap).forEach(function(id) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener('focus', function() { highlightStep(stepMap[id]); });
+    el.addEventListener('blur', function() { clearStepHighlight(); });
+  });
+
+  // ==================== Image Fallback ====================
+
+  function setupImageFallback(imgId, cssClass, emoji, label) {
+    var img = $(imgId);
+    if (!img) return;
+    img.addEventListener('error', function() {
+      var div = document.createElement('div');
+      div.className = 'avatar-fallback ' + cssClass;
+      div.textContent = emoji;
+      div.setAttribute('role', 'img');
+      div.setAttribute('aria-label', label);
+      img.parentNode.replaceChild(div, img);
+    });
+  }
+
+  setupImageFallback('img-bob', 'bob-avatar', '\uD83D\uDC68', 'Bob');
+  setupImageFallback('img-alice', 'alice-avatar', '\uD83D\uDC69', 'Alice');
+
+  // ==================== Init ====================
+  applyLang();
+
+})();
+</script>
+
+</body>
+</html>
